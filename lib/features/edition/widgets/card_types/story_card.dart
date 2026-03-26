@@ -1,52 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 
-/// A story card for ~2-minute reads.
+/// Story card — Minimal Luxury design.
 ///
 /// Layout:
-/// - Bold title at top
-/// - Longer body rendered as markdown
-/// - Scrollable within the card if content overflows
-/// - Light amber-tinted background
+/// - Pill badge "Story" in muted purple
+/// - Reading time estimate with clock icon
+/// - Title in Playfair Display
+/// - Long body with comfortable reading typography
+/// - Pull quotes in Playfair Display italic with gold left border
 class StoryCard extends StatelessWidget {
   const StoryCard({super.key, required this.card});
 
   final CardModel card;
 
+  String _readTime(int seconds) {
+    if (seconds < 60) return '${seconds}s read';
+    final minutes = (seconds / 60).ceil();
+    return '$minutes min read';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.story.withOpacity(0.04),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Decorative icon
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.story.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.auto_stories_outlined,
-              color: AppColors.story,
-              size: 22,
-            ),
+          // Top row: pill badge + reading time
+          Row(
+            children: [
+              // Pill badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.story.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.auto_stories_outlined,
+                      size: 14,
+                      color: AppColors.story,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Story',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.story,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Reading time
+              Icon(
+                Icons.schedule_rounded,
+                size: 13,
+                color: AppColors.textMuted.withOpacity(0.7),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                _readTime(card.estimatedReadSeconds),
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Title
           Text(
             card.title,
-            style: const TextStyle(
-              fontSize: 22,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
               height: 1.3,
@@ -54,7 +94,7 @@ class StoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Body — markdown rendered, scrollable
+          // Body — markdown rendered
           Expanded(
             child: Markdown(
               data: card.body,
@@ -62,39 +102,47 @@ class StoryCard extends StatelessWidget {
               physics: const ClampingScrollPhysics(),
               padding: EdgeInsets.zero,
               styleSheet: MarkdownStyleSheet(
-                p: const TextStyle(
+                p: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary,
-                  height: 1.7,
+                  height: 1.8,
                 ),
-                h1: const TextStyle(
+                h1: GoogleFonts.playfairDisplay(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
-                h2: const TextStyle(
+                h2: GoogleFonts.playfairDisplay(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
-                strong: const TextStyle(
+                strong: GoogleFonts.inter(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
-                em: const TextStyle(
+                em: GoogleFonts.inter(
                   fontStyle: FontStyle.italic,
                   color: AppColors.textSecondary,
                 ),
+                // Pull quote styling with gold left border
                 blockquotePadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                blockquoteDecoration: BoxDecoration(
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                blockquoteDecoration: const BoxDecoration(
                   border: Border(
                     left: BorderSide(
-                      color: AppColors.story.withOpacity(0.5),
+                      color: AppColors.primary,
                       width: 3,
                     ),
                   ),
+                ),
+                blockquote: GoogleFonts.playfairDisplay(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.textPrimary,
+                  height: 1.6,
                 ),
               ),
             ),
@@ -104,10 +152,11 @@ class StoryCard extends StatelessWidget {
           if (card.sourceName != null && card.sourceName!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
-              'Source: ${card.sourceName}',
-              style: const TextStyle(
+              '\u2014 ${card.sourceName}',
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.italic,
                 color: AppColors.textMuted,
               ),
             ),

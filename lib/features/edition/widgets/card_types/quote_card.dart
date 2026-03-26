@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 
-/// A quote card for ~10-second reads.
+/// Quote card — Minimal Luxury design.
 ///
-/// Layout:
-/// - Large decorative opening quote mark
-/// - Quote text in italic, large font (20 px)
-/// - Attribution: "-- Author Name"
-/// - Vertically and horizontally centred
-/// - Gradient background from [AppColors.quote]
+/// COMPLETELY different layout: minimal, centered.
+/// - Large decorative quotation mark in gold (72px)
+/// - Quote text in Playfair Display italic, 22px, centered
+/// - Attribution in small caps Inter
+/// - Warm gold gradient background (very subtle)
+/// - No left border, centered elegant layout
+/// - Extra vertical padding for breathing room
 class QuoteCard extends StatelessWidget {
   const QuoteCard({super.key, required this.card});
 
@@ -25,68 +27,82 @@ class QuoteCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            AppColors.quote.withOpacity(0.08),
-            Colors.white,
+            AppColors.primary.withOpacity(0.04),
+            AppColors.primaryLight.withOpacity(0.06),
+            Colors.white.withOpacity(0.0),
           ],
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Opening quote mark
+          const Spacer(flex: 1),
+
+          // Large decorative opening quote mark in gold
           Text(
-            '\u201C', // left double quotation mark
-            style: TextStyle(
+            '\u201C',
+            style: GoogleFonts.playfairDisplay(
               fontSize: 72,
               fontWeight: FontWeight.w700,
-              color: AppColors.quote.withOpacity(0.25),
+              color: AppColors.primary.withOpacity(0.35),
               height: 0.8,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
 
           // Quote text
           Text(
             quoteText,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 20,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 22,
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
               color: AppColors.textPrimary,
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
 
-          // Attribution
+          // Thin gold divider
+          Container(
+            width: 40,
+            height: 1,
+            color: AppColors.primary.withOpacity(0.3),
+          ),
+          const SizedBox(height: 16),
+
+          // Attribution in small caps
           Text(
-            '\u2014 $attribution',
+            '\u2014 ${attribution.toUpperCase()}',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
+            style: GoogleFonts.inter(
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
+              letterSpacing: 1.5,
             ),
           ),
 
           // Source
           if (card.sourceName != null && card.sourceName!.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               card.sourceName!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
+              style: GoogleFonts.inter(
+                fontSize: 11,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textMuted,
               ),
             ),
           ],
+
+          const Spacer(flex: 1),
         ],
       ),
     );

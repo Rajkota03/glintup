@@ -1,19 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 import 'package:glintup/data/models/topic_model.dart';
 import 'package:glintup/features/explore/providers/explore_provider.dart';
 
 /// ──────────────────────────────────────────────────────────────
-/// Explore Screen
-///
-/// Layout:
-///   1. Working search bar with debounce
-///   2. Horizontal topic chips
-///   3. Vertical card feed for the selected topic
-///   4. Rabbit Holes section (horizontal carousel)
+/// Explore Screen — Minimal Luxury + Warm Editorial
 /// ──────────────────────────────────────────────────────────────
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -54,19 +49,21 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final isSearching = searchQuery.trim().isNotEmpty;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
             // ── Header ──────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: Text(
                   'Explore',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ),
@@ -74,36 +71,45 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             // ── Search bar ──────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
                     decoration: InputDecoration(
-                      hintText: 'Search topics, cards...',
-                      hintStyle: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey.shade400,
+                      hintText: 'Discover something new...',
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.textTertiary,
                       ),
-                      prefixIcon: Icon(Icons.search_rounded,
-                          color: Colors.grey.shade400, size: 22),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: AppColors.textTertiary,
+                        size: 20,
+                      ),
                       suffixIcon: isSearching
                           ? GestureDetector(
                               onTap: _clearSearch,
-                              child: Icon(Icons.close_rounded,
-                                  color: Colors.grey.shade500, size: 20),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: AppColors.textTertiary,
+                                size: 18,
+                              ),
                             )
                           : null,
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       contentPadding:
                           const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    style: const TextStyle(fontSize: 15),
+                    style: GoogleFonts.inter(fontSize: 14),
                   ),
                 ),
               ),
@@ -122,11 +128,15 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   loading: () => const Padding(
                     padding: EdgeInsets.all(20),
                     child: Center(
-                        child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
                   ),
                   error: (e, st) => const SizedBox.shrink(),
                   data: (topics) => _TopicChipsRow(
@@ -144,31 +154,70 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               if (selectedTopic != null) ...[
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                    child: Text(
-                      _topicDisplayName(
-                          selectedTopic, topicsAsync.valueOrNull ?? []),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                    child: _SectionHeader(
+                      title: _topicDisplayName(
+                          selectedTopic, topicsAsync.valueOrNull ?? [])
+                          .toUpperCase(),
                     ),
                   ),
                 ),
                 _TopicCardsFeed(topic: selectedTopic),
               ],
 
-              // ── Rabbit Holes ────────────────────────────────
+              // ── Trending + Rabbit Holes ───────────────────
               if (selectedTopic == null) ...[
+                // Trending header
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                    child: Row(
+                      children: [
+                        Text(
+                          'TRENDING',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textTertiary,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Trending cards (first few from default topic)
+                SliverToBoxAdapter(
+                  child: topicsAsync.when(
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                    data: (topics) {
+                      if (topics.isEmpty) return const SizedBox.shrink();
+                      return _TrendingCardsList(topic: topics.first.slug);
+                    },
+                  ),
+                ),
+
+                // Deep Dives header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
                     child: Text(
-                      'Rabbit Holes',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      'DEEP DIVES',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textTertiary,
+                        letterSpacing: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -176,7 +225,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   child: rabbitHolesAsync.when(
                     loading: () => const Padding(
                       padding: EdgeInsets.all(20),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ),
                     error: (e, st) => const SizedBox.shrink(),
                     data: (holes) {
@@ -185,8 +238,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           padding: const EdgeInsets.all(20),
                           child: Center(
                             child: Text(
-                              'Rabbit holes coming soon!',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              'Deep dives coming soon!',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: AppColors.textTertiary,
+                              ),
                             ),
                           ),
                         );
@@ -196,7 +252,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           padding:
-                              const EdgeInsets.symmetric(horizontal: 20),
+                              const EdgeInsets.symmetric(horizontal: 24),
                           itemCount: holes.length,
                           separatorBuilder: (context, i) =>
                               const SizedBox(width: 14),
@@ -208,16 +264,18 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   ),
                 ),
 
-                // ── Browse by topic grid ──────────────────────
+                // Browse by topic grid
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
                     child: Text(
-                      'Browse by Topic',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      'BROWSE BY TOPIC',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textTertiary,
+                        letterSpacing: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -253,6 +311,55 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 // Sub-widgets
 // ═══════════════════════════════════════════════════════════════
 
+/// Small-caps section header with letter spacing.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textTertiary,
+        letterSpacing: 1.5,
+      ),
+    );
+  }
+}
+
+/// Trending cards list for default topic.
+class _TrendingCardsList extends ConsumerWidget {
+  final String topic;
+  const _TrendingCardsList({required this.topic});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cardsAsync = ref.watch(exploreCardsProvider(topic));
+
+    return cardsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (cards) {
+        final trending = cards.take(3).toList();
+        if (trending.isEmpty) return const SizedBox.shrink();
+        return Column(
+          children: trending
+              .map((card) => _ExploreCardTile(card: card))
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
 /// Search results list shown when search query is active.
 class _SearchResultsList extends ConsumerWidget {
   @override
@@ -263,10 +370,12 @@ class _SearchResultsList extends ConsumerWidget {
       loading: () => const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.all(40),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
         ),
       ),
-      error: (e, _) => SliverToBoxAdapter(
+      error: (e, st) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Text('Error searching: $e'),
@@ -281,19 +390,22 @@ class _SearchResultsList extends ConsumerWidget {
                 child: Column(
                   children: [
                     Icon(Icons.search_off_rounded,
-                        size: 48, color: Colors.grey.shade300),
+                        size: 48, color: AppColors.textTertiary.withValues(alpha: 0.4)),
                     const SizedBox(height: 12),
                     Text(
                       'No results found',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(color: AppColors.textSecondary),
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 18,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Try a different search term',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ],
                 ),
@@ -324,94 +436,43 @@ class _TopicChipsRow extends StatelessWidget {
     required this.onSelected,
   });
 
-  Color _topicColor(String slug) {
-    switch (slug) {
-      case 'science':
-        return AppColors.science;
-      case 'history':
-        return AppColors.history;
-      case 'psychology':
-        return AppColors.psychology;
-      case 'technology':
-        return AppColors.technology;
-      case 'arts':
-        return AppColors.arts;
-      case 'business':
-        return AppColors.business;
-      case 'nature':
-        return AppColors.nature;
-      case 'space':
-        return AppColors.space;
-      default:
-        return AppColors.primary;
-    }
-  }
-
-  IconData _topicIcon(String? iconName) {
-    switch (iconName) {
-      case 'science':
-        return Icons.science_rounded;
-      case 'history_edu':
-        return Icons.history_edu_rounded;
-      case 'psychology':
-        return Icons.psychology_rounded;
-      case 'computer':
-        return Icons.computer_rounded;
-      case 'palette':
-        return Icons.palette_rounded;
-      case 'business':
-        return Icons.business_rounded;
-      case 'eco':
-        return Icons.eco_rounded;
-      case 'rocket_launch':
-        return Icons.rocket_launch_rounded;
-      default:
-        return Icons.topic_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         itemCount: topics.length,
         separatorBuilder: (context, i) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final topic = topics[index];
           final isSelected = selectedSlug == topic.slug;
-          final color = _topicColor(topic.slug);
 
           return GestureDetector(
             onTap: () => onSelected(topic.slug),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? color : color.withValues(alpha: 0.08),
+                color: isSelected ? AppColors.primary : AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
+                border: isSelected
+                    ? null
+                    : Border.all(color: AppColors.border, width: 0.5),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _topicIcon(topic.iconName),
-                    size: 16,
-                    color: isSelected ? Colors.white : color,
+              child: Center(
+                child: Text(
+                  topic.displayName,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected
+                        ? Colors.white
+                        : AppColors.textSecondary,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    topic.displayName,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : color,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           );
@@ -454,30 +515,30 @@ class _TopicGrid extends StatelessWidget {
   IconData _topicIcon(String? iconName) {
     switch (iconName) {
       case 'science':
-        return Icons.science_rounded;
+        return Icons.science_outlined;
       case 'history_edu':
-        return Icons.history_edu_rounded;
+        return Icons.history_edu_outlined;
       case 'psychology':
-        return Icons.psychology_rounded;
+        return Icons.psychology_outlined;
       case 'computer':
-        return Icons.computer_rounded;
+        return Icons.computer_outlined;
       case 'palette':
-        return Icons.palette_rounded;
+        return Icons.palette_outlined;
       case 'business':
-        return Icons.business_rounded;
+        return Icons.business_outlined;
       case 'eco':
-        return Icons.eco_rounded;
+        return Icons.eco_outlined;
       case 'rocket_launch':
-        return Icons.rocket_launch_rounded;
+        return Icons.rocket_launch_outlined;
       default:
-        return Icons.topic_rounded;
+        return Icons.topic_outlined;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -486,12 +547,18 @@ class _TopicGrid extends StatelessWidget {
           return GestureDetector(
             onTap: () => onTap(topic.slug),
             child: Container(
-              width: (MediaQuery.of(context).size.width - 52) / 2,
+              width: (MediaQuery.of(context).size.width - 60) / 2,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.06),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: color.withValues(alpha: 0.15)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -499,7 +566,7 @@ class _TopicGrid extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(_topicIcon(topic.iconName),
@@ -509,10 +576,10 @@ class _TopicGrid extends StatelessWidget {
                   Expanded(
                     child: Text(
                       topic.displayName,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: color,
+                        color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -541,10 +608,12 @@ class _TopicCardsFeed extends ConsumerWidget {
       loading: () => const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.all(40),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
         ),
       ),
-      error: (e, _) => SliverToBoxAdapter(
+      error: (e, st) => SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Text('Error loading cards: $e'),
@@ -558,12 +627,16 @@ class _TopicCardsFeed extends ConsumerWidget {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.inbox_rounded,
-                        size: 48, color: Colors.grey.shade300),
+                    Icon(Icons.inbox_outlined,
+                        size: 48,
+                        color: AppColors.textTertiary.withValues(alpha: 0.4)),
                     const SizedBox(height: 12),
                     Text(
                       'No cards yet for this topic',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ],
                 ),
@@ -582,7 +655,7 @@ class _TopicCardsFeed extends ConsumerWidget {
   }
 }
 
-/// A single card tile in the topic feed.
+/// A single card tile in the explore feed.
 class _ExploreCardTile extends StatelessWidget {
   final CardModel card;
   const _ExploreCardTile({required this.card});
@@ -610,62 +683,122 @@ class _ExploreCardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _typeColor(card.cardType);
+    final readTime = card.estimatedReadSeconds >= 60
+        ? '${card.estimatedReadSeconds ~/ 60} min'
+        : '${card.estimatedReadSeconds}s';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _typeLabel(card.cardType),
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left colored border
+            Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  bottomLeft: Radius.circular(16),
                 ),
               ),
-              const Spacer(),
-              Text(
-                '${card.estimatedReadSeconds}s',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            card.title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+            ),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Topic label
+                    Text(
+                      card.topic.toUpperCase(),
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textTertiary,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // Title
+                    Text(
+                      card.title,
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (card.summary != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        card.summary!,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textTertiary,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    // Bottom row
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _typeLabel(card.cardType),
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          readTime,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.bookmark_border,
+                          size: 18,
+                          color: AppColors.textTertiary,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (card.summary != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              card.summary!,
-              style: Theme.of(context).textTheme.bodyMedium,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -704,109 +837,57 @@ class _RabbitHoleCard extends StatelessWidget {
     final color = _topicColor(hole.topic);
 
     return Container(
-      width: 240,
-      padding: const EdgeInsets.all(16),
+      width: 280,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            color.withValues(alpha: 0.08),
-            color.withValues(alpha: 0.02)
+            color.withValues(alpha: 0.85),
+            color.withValues(alpha: 0.6),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  hole.topic,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+          if (hole.isPremium)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'PRO',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
                 ),
               ),
-              const Spacer(),
-              if (hole.isPremium)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'PRO',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.accent,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
+            ),
+          const SizedBox(height: 8),
           Text(
             hole.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          if (hole.description != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              hole.description!,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
           const Spacer(),
-          Row(
-            children: [
-              Icon(Icons.style_rounded,
-                  size: 14, color: Colors.grey.shade400),
-              const SizedBox(width: 4),
-              Text(
-                '${hole.totalCards} cards',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Icon(Icons.timer_outlined,
-                  size: 14, color: Colors.grey.shade400),
-              const SizedBox(width: 4),
-              Text(
-                '${hole.estimatedTimeMinutes}m',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-            ],
+          Text(
+            '${hole.totalCards} cards  ·  ${hole.estimatedTimeMinutes} min',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
           ),
         ],
       ),

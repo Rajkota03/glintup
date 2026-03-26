@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glintup — Design Preview: Minimal Luxury + Warm Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cream: #FAF9F6;
+    --white: #FFFFFF;
+    --gold: #C8A951;
+    --gold-light: #E8D9A0;
+    --gold-dark: #A8893A;
+    --green: #2D5016;
+    --green-light: #E8F0E2;
+    --charcoal: #1A1A1A;
+    --gray: #6B6B6B;
+    --gray-light: #9A9A9A;
+    --divider: #E8E5E0;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-pill: 100px;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: #EDEAE5;
+    font-family: var(--font-sans);
+    color: var(--charcoal);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px 60px;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  /* ── Page Header ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--charcoal);
+    letter-spacing: -0.5px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .page-header .directions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .page-header .dir-badge {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--divider);
+    color: var(--gray);
+    background: var(--white);
+  }
+
+  /* ── Screen Tabs ── */
+  .screen-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+    max-width: 520px;
+  }
+  .screen-tab {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--divider);
+    background: var(--white);
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .screen-tab:hover {
+    border-color: var(--gold-light);
+    color: var(--charcoal);
+  }
+  .screen-tab.active {
+    background: var(--charcoal);
+    color: var(--white);
+    border-color: var(--charcoal);
+  }
+
+  /* ── Phone Frame ── */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    background: var(--cream);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 2px #1a1a1a,
+      0 0 0 4px #333,
+      0 20px 60px rgba(0,0,0,0.25),
+      0 0 0 6px #555,
+      inset 0 0 2px rgba(0,0,0,0.1);
+  }
+
+  /* Notch */
+  .phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 34px;
+    background: #1A1A1A;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+  .phone-notch::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--charcoal);
+    position: relative;
+    z-index: 50;
+  }
+  .status-bar .time { font-size: 14px; font-weight: 600; }
+  .status-icons { display: flex; gap: 4px; align-items: center; font-size: 11px; }
+
+  /* ── Screen Container ── */
+  .screen-container {
+    position: absolute;
+    top: 54px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    bottom: 72px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+    padding: 20px 20px 24px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Bottom Tab Bar ── */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: var(--white);
+    border-top: 1px solid var(--divider);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding-top: 10px;
+    z-index: 90;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    position: relative;
+  }
+  .tab-icon {
+    font-size: 20px;
+    color: var(--gray-light);
+    transition: color 0.3s ease;
+    line-height: 1;
+  }
+  .tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gray-light);
+    letter-spacing: 0.3px;
+    transition: color 0.3s ease;
+  }
+  .tab-item.active .tab-icon,
+  .tab-item.active .tab-label { color: var(--gold); }
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* ── Shared Components ── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    margin-bottom: 16px;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--cream);
+    color: var(--gray);
+  }
+
+  .topic-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 8px;
+  }
+
+  .title-serif {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.3;
+    color: var(--charcoal);
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+  }
+
+  .body-text {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #3D3D3D;
+  }
+
+  .source {
+    font-style: italic;
+    font-size: 13px;
+    color: var(--gray-light);
+    margin-top: 14px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--divider);
+    margin: 16px 0;
+  }
+
+  /* Gold shimmer animation */
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .gold-shimmer {
+    background: linear-gradient(
+      110deg,
+      var(--gold) 0%,
+      #DFC776 25%,
+      var(--gold) 50%,
+      #DFC776 75%,
+      var(--gold) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 4s ease-in-out infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(200,169,81,0.2); }
+    50% { box-shadow: 0 0 24px rgba(200,169,81,0.35); }
+  }
+
+  /* ──────── SCREEN 1: TODAY ──────── */
+  .today-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .today-date {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--charcoal);
+  }
+  .edition-badge {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    padding: 3px 10px;
+    border: 1px solid var(--gold-light);
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, rgba(200,169,81,0.08), rgba(200,169,81,0.02));
+  }
+
+  .progress-container {
+    margin-bottom: 24px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gray-light);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--divider);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--divider);
+  }
+  .card-actions-left {
+    display: flex;
+    gap: 16px;
+  }
+  .action-btn {
+    font-size: 18px;
+    color: var(--gray-light);
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+  .action-btn:hover { color: var(--gold); }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 20px 0 8px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--divider);
+    transition: all 0.3s;
+  }
+  .dot.active {
+    background: var(--gold);
+    width: 20px;
+    border-radius: 3px;
+  }
+
+  .swipe-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray-light);
+    margin-top: 8px;
+    opacity: 0.6;
+    letter-spacing: 0.3px;
+  }
+
+  /* ──────── SCREEN 2: STORY ──────── */
+  .reading-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gray-light);
+    margin-bottom: 16px;
+  }
+  .reading-meta svg { width: 14px; height: 14px; }
+
+  .pull-quote {
+    margin: 24px 0;
+    padding: 16px 0 16px 20px;
+    border-left: 3px solid var(--gold);
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--charcoal);
+  }
+
+  .story-body p { margin-bottom: 16px; }
+
+  /* ──────── SCREEN 3: QUOTE ──────── */
+  .quote-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    text-align: center;
+    padding: 40px 24px;
+    background: linear-gradient(180deg, var(--cream) 0%, #F5F0E8 100%);
+    margin: -20px;
+    padding: 60px 40px;
+  }
+  .quote-mark {
+    font-family: var(--font-serif);
+    font-size: 80px;
+    line-height: 1;
+    color: var(--gold);
+    margin-bottom: -10px;
+    opacity: 0.6;
+  }
+  .quote-text {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.5;
+    color: var(--charcoal);
+    margin-bottom: 24px;
+    max-width: 280px;
+  }
+  .quote-attribution {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+  .quote-card-badge {
+    margin-bottom: 24px;
+  }
+
+  /* ──────── SCREEN 4: PROFILE ──────── */
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(200,169,81,0.25);
+  }
+  .profile-name {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--charcoal);
+  }
+
+  .streak-card {
+    background: linear-gradient(135deg, #C8A951 0%, #D4A843 50%, #B8942E 100%);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(200,169,81,0.3);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  .streak-icon { font-size: 28px; }
+  .streak-info {}
+  .streak-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .streak-sub {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+  .stat-number {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--charcoal);
+    line-height: 1.2;
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray-light);
+    margin-top: 4px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 12px;
+  }
+
+  .topic-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topic-pill {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--divider);
+    color: var(--charcoal);
+    background: var(--white);
+    transition: all 0.2s;
+  }
+  .topic-pill:hover {
+    border-color: var(--gold-light);
+    background: rgba(200,169,81,0.06);
+  }
+
+  /* ──────── SCREEN 5: EXPLORE ──────── */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #F0EDE8;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+  .search-icon { color: var(--gray-light); font-size: 16px; }
+  .search-placeholder {
+    font-size: 14px;
+    color: var(--gray-light);
+  }
+
+  .topic-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    padding-bottom: 4px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .topic-chips::-webkit-scrollbar { display: none; }
+  .topic-chip {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--divider);
+    background: var(--white);
+    color: var(--charcoal);
+    position: relative;
+    padding-left: 22px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .topic-chip::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+  }
+  .topic-chip.science::before { background: #4A90D9; }
+  .topic-chip.history::before { background: #C8A951; }
+  .topic-chip.nature::before { background: var(--green); }
+  .topic-chip.tech::before { background: #7B68EE; }
+  .topic-chip.culture::before { background: #E07B5D; }
+  .topic-chip.space::before { background: #2C3E50; }
+  .topic-chip:hover {
+    border-color: var(--gold-light);
+    transform: translateY(-1px);
+  }
+
+  .trending-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .trending-header span {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray);
+    white-space: nowrap;
+  }
+  .trending-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--divider);
+  }
+
+  .explore-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+  .explore-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+  }
+  .explore-card-info { flex: 1; }
+  .explore-card-topic {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+  }
+  .explore-card-title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.3;
+    color: var(--charcoal);
+    margin-bottom: 4px;
+  }
+  .explore-card-excerpt {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .explore-card-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .explore-card-type { font-size: 16px; }
+  .explore-card-time {
+    font-size: 10px;
+    color: var(--gray-light);
+    white-space: nowrap;
+  }
+
+  /* ──────── SCREEN 6: QUESTION ──────── */
+  .question-text {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.35;
+    color: var(--charcoal);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .answer-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border: 1.5px solid var(--divider);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .answer-option:hover {
+    border-color: var(--gold-light);
+    background: rgba(200,169,81,0.04);
+  }
+  .answer-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--gray);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .answer-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--charcoal);
+  }
+  .answer-option.correct {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+  .answer-option.correct .answer-letter {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+  }
+  .answer-option.correct .answer-text { color: var(--green); font-weight: 600; }
+
+  .explanation-box {
+    background: var(--cream);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 20px;
+    border-left: 3px solid var(--green);
+  }
+  .explanation-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+  .explanation-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #3D3D3D;
+  }
+
+  /* ──────── SCREEN 7: COMPLETION ──────── */
+  .completion-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    text-align: center;
+    padding: 40px 24px;
+    margin: -20px;
+    padding: 40px 32px;
+  }
+  .completion-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s ease;
+  }
+  .completion-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--charcoal);
+    margin-bottom: 16px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .completion-stats {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 28px;
+    letter-spacing: 0.3px;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+  .completion-stats span {
+    margin: 0 6px;
+    color: var(--divider);
+  }
+  .completion-streak {
+    background: linear-gradient(135deg, rgba(200,169,81,0.12), rgba(200,169,81,0.04));
+    border: 1px solid var(--gold-light);
+    border-radius: var(--radius);
+    padding: 18px 28px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.3s both;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .completion-streak-icon { font-size: 24px; }
+  .completion-streak-text {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--gold-dark);
+  }
+  .completion-xp {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--gold-dark);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.35s both;
+  }
+
+  .cta-button {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 14px 36px;
+    border: none;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 16px rgba(200,169,81,0.3);
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(200,169,81,0.4);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 420px) {
+    .phone-frame {
+      width: 100%;
+      max-width: 375px;
+      border-radius: 0;
+      box-shadow: none;
+      height: 100vh;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Glintup</h1>
+  <p>Design Preview — Hybrid Direction</p>
+  <div class="directions">
+    <span class="dir-badge">A: Minimal Luxury</span>
+    <span class="dir-badge">C: Warm Editorial</span>
+  </div>
+</div>
+
+<div class="screen-tabs">
+  <button class="screen-tab active" onclick="showScreen(0)">Today</button>
+  <button class="screen-tab" onclick="showScreen(1)">Story</button>
+  <button class="screen-tab" onclick="showScreen(2)">Quote</button>
+  <button class="screen-tab" onclick="showScreen(3)">Profile</button>
+  <button class="screen-tab" onclick="showScreen(4)">Explore</button>
+  <button class="screen-tab" onclick="showScreen(5)">Question</button>
+  <button class="screen-tab" onclick="showScreen(6)">Complete</button>
+</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="status-icons">
+      <span>&#9679;&#9679;&#9679;&#9679;</span>
+      <span style="margin-left:2px">&#128267;</span>
+    </div>
+  </div>
+
+  <div class="screen-container">
+
+    <!-- ═══ SCREEN 0: TODAY ═══ -->
+    <div class="screen active" id="screen-0">
+      <div class="today-header">
+        <div class="today-date">Saturday, March 21</div>
+        <div class="edition-badge">Edition #42</div>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-label">
+          <span>Today's Progress</span>
+          <span>3 of 10</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <div class="badge">&#9889; Quick Fact</div>
+        </div>
+        <div class="topic-label">Science</div>
+        <div class="title-serif">Octopuses Have Three Hearts</div>
+        <div class="body-text">
+          Two of their hearts pump blood to the gills, while the third pumps it to the rest of the body. When an octopus swims, the heart that delivers blood to the body actually stops beating, which is why they prefer crawling to swimming.
+        </div>
+        <div class="source">— National Geographic</div>
+
+        <div class="card-actions">
+          <div class="card-actions-left">
+            <button class="action-btn" title="Bookmark">&#9744;</button>
+            <button class="action-btn" title="Share">&#8599;</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="swipe-hint">Swipe up for next card</div>
+    </div>
+
+    <!-- ═══ SCREEN 1: STORY ═══ -->
+    <div class="screen" id="screen-1">
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding: 24px 24px 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div class="badge">&#128214; Story</div>
+          </div>
+          <div class="topic-label">History</div>
+          <div class="title-serif">The Accidental Discovery of Penicillin</div>
+          <div class="reading-meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>3 min read</span>
+          </div>
+        </div>
+
+        <div style="padding: 0 24px 24px;" class="story-body">
+          <p class="body-text">
+            In 1928, Scottish bacteriologist Alexander Fleming returned to his laboratory after a summer holiday to find something unexpected. A petri dish containing Staphylococcus bacteria had been contaminated by a mold — and the bacteria around the mold had been destroyed.
+          </p>
+
+          <div class="pull-quote">
+            "One sometimes finds what one is not looking for."
+          </div>
+
+          <p class="body-text">
+            The mold, later identified as Penicillium notatum, was producing a substance that killed bacteria. Fleming named it penicillin, though it would take another decade before Howard Florey and Ernst Boris Chain developed it into a usable medicine.
+          </p>
+          <p class="body-text">
+            By 1945, penicillin was being mass-produced and saving countless lives during World War II. That same year, Fleming, Florey, and Chain shared the Nobel Prize in Physiology or Medicine for their work.
+          </p>
+          <p class="body-text">
+            Today, penicillin and its derivatives remain among the most widely used antibiotics in the world — all because a scientist forgot to clean a petri dish before leaving on vacation.
+          </p>
+          <div class="source">— Smithsonian Magazine</div>
+        </div>
+      </div>
+
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 2: QUOTE ═══ -->
+    <div class="screen" id="screen-2">
+      <div class="quote-screen">
+        <div class="quote-card-badge">
+          <div class="badge">&#10024; Quote</div>
+        </div>
+        <div class="quote-mark">&ldquo;</div>
+        <div class="quote-text">
+          The only way to do great work is to love what you do.
+        </div>
+        <div class="quote-attribution">— Steve Jobs</div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 3: PROFILE ═══ -->
+    <div class="screen" id="screen-3">
+      <div class="profile-header">
+        <div class="avatar">R</div>
+        <div class="profile-name">Rajnikanth</div>
+      </div>
+
+      <div class="streak-card">
+        <div class="streak-icon">&#128293;</div>
+        <div class="streak-info">
+          <div class="streak-title">7 Day Streak</div>
+          <div class="streak-sub">Keep it going!</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">42</div>
+          <div class="stat-label">Editions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">420</div>
+          <div class="stat-label">Cards Read</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">7h</div>
+          <div class="stat-label">Time Spent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">Lvl 9</div>
+          <div class="stat-label">Level</div>
+        </div>
+      </div>
+
+      <div class="section-title">Your Topics</div>
+      <div class="topic-pills">
+        <div class="topic-pill">&#127793; Science</div>
+        <div class="topic-pill">&#128218; History</div>
+        <div class="topic-pill">&#127758; Nature</div>
+        <div class="topic-pill">&#128187; Technology</div>
+        <div class="topic-pill">&#127912; Culture</div>
+        <div class="topic-pill">&#128640; Space</div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 4: EXPLORE ═══ -->
+    <div class="screen" id="screen-4">
+      <div class="search-bar">
+        <span class="search-icon">&#128269;</span>
+        <span class="search-placeholder">Discover something new...</span>
+      </div>
+
+      <div class="topic-chips">
+        <div class="topic-chip science">Science</div>
+        <div class="topic-chip history">History</div>
+        <div class="topic-chip nature">Nature</div>
+        <div class="topic-chip tech">Technology</div>
+        <div class="topic-chip culture">Culture</div>
+        <div class="topic-chip space">Space</div>
+      </div>
+
+      <div class="trending-header"><span>Trending</span></div>
+
+      <div class="explore-card">
+        <div class="explore-card-info">
+          <div class="explore-card-topic">Science</div>
+          <div class="explore-card-title">Why Do We Dream?</div>
+          <div class="explore-card-excerpt">Scientists have debated the purpose of dreams for centuries...</div>
+        </div>
+        <div class="explore-card-meta">
+          <span class="explore-card-type">&#128214;</span>
+          <span class="explore-card-time">4 min</span>
+        </div>
+      </div>
+
+      <div class="explore-card">
+        <div class="explore-card-info">
+          <div class="explore-card-topic">History</div>
+          <div class="explore-card-title">The Library of Alexandria</div>
+          <div class="explore-card-excerpt">Once the largest collection of knowledge in the ancient world...</div>
+        </div>
+        <div class="explore-card-meta">
+          <span class="explore-card-type">&#9889;</span>
+          <span class="explore-card-time">2 min</span>
+        </div>
+      </div>
+
+      <div class="explore-card">
+        <div class="explore-card-info">
+          <div class="explore-card-topic">Nature</div>
+          <div class="explore-card-title">Trees That Talk to Each Other</div>
+          <div class="explore-card-excerpt">Underground fungal networks let forests share nutrients...</div>
+        </div>
+        <div class="explore-card-meta">
+          <span class="explore-card-type">&#128214;</span>
+          <span class="explore-card-time">3 min</span>
+        </div>
+      </div>
+
+      <div class="explore-card">
+        <div class="explore-card-info">
+          <div class="explore-card-topic">Space</div>
+          <div class="explore-card-title">A Day on Venus Is Longer Than Its Year</div>
+          <div class="explore-card-excerpt">Venus rotates so slowly that a single day takes 243 Earth days...</div>
+        </div>
+        <div class="explore-card-meta">
+          <span class="explore-card-type">&#9889;</span>
+          <span class="explore-card-time">1 min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 5: QUESTION ═══ -->
+    <div class="screen" id="screen-5">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div class="badge">&#10067; Question</div>
+      </div>
+      <div class="topic-label" style="text-align:center;">Science</div>
+
+      <div class="question-text">
+        What percentage of Earth's ocean has been explored?
+      </div>
+
+      <div class="answer-option correct">
+        <div class="answer-letter">&#10003;</div>
+        <div class="answer-text">A) 5%</div>
+      </div>
+      <div class="answer-option">
+        <div class="answer-letter">B</div>
+        <div class="answer-text">B) 20%</div>
+      </div>
+      <div class="answer-option">
+        <div class="answer-letter">C</div>
+        <div class="answer-text">C) 50%</div>
+      </div>
+      <div class="answer-option">
+        <div class="answer-letter">D</div>
+        <div class="answer-text">D) 80%</div>
+      </div>
+
+      <div class="explanation-box">
+        <div class="explanation-title">&#9989; Correct</div>
+        <div class="explanation-text">
+          Despite covering over 70% of our planet's surface, more than 95% of the ocean remains unexplored. We have better maps of Mars than we do of our own ocean floor.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 6: COMPLETION ═══ -->
+    <div class="screen" id="screen-6">
+      <div class="completion-screen">
+        <div class="completion-icon">&#10024;</div>
+        <div class="completion-title">Edition Complete</div>
+        <div class="completion-stats">
+          10 cards <span>&middot;</span> 8 min <span>&middot;</span> +125 XP
+        </div>
+        <div class="completion-streak">
+          <span class="completion-streak-icon">&#128293;</span>
+          <span class="completion-streak-text">7 Day Streak</span>
+        </div>
+        <div class="completion-xp gold-shimmer" style="font-size:16px; font-family:var(--font-serif); font-weight:600;">+125 XP Earned</div>
+        <button class="cta-button">See You Tomorrow</button>
+      </div>
+    </div>
+
+  </div><!-- /screen-container -->
+
+  <!-- ── Bottom Tab Bar ── -->
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-today" onclick="showScreen(0)">
+      <span class="tab-icon">&#9673;</span>
+      <span class="tab-label">Today</span>
+    </div>
+    <div class="tab-item" id="tab-library" onclick="showScreen(1)">
+      <span class="tab-icon">&#9776;</span>
+      <span class="tab-label">Library</span>
+    </div>
+    <div class="tab-item" id="tab-explore" onclick="showScreen(4)">
+      <span class="tab-icon">&#9789;</span>
+      <span class="tab-label">Explore</span>
+    </div>
+    <div class="tab-item" id="tab-profile" onclick="showScreen(3)">
+      <span class="tab-icon">&#9673;</span>
+      <span class="tab-label">Profile</span>
+    </div>
+  </div>
+
+</div><!-- /phone-frame -->
+
+<script>
+  const screens = document.querySelectorAll('.screen');
+  const tabs = document.querySelectorAll('.screen-tab');
+  const tabItems = document.querySelectorAll('.tab-item');
+
+  // Map screen indices to bottom tab indices
+  const screenToTab = { 0: 0, 1: 1, 2: 1, 3: 3, 4: 2, 5: 0, 6: 0 };
+
+  function showScreen(index) {
+    screens.forEach((s, i) => {
+      s.classList.toggle('active', i === index);
+    });
+    tabs.forEach((t, i) => {
+      t.classList.toggle('active', i === index);
+    });
+    // Update bottom tab bar
+    const activeTab = screenToTab[index] ?? 0;
+    tabItems.forEach((t, i) => {
+      t.classList.toggle('active', i === activeTab);
+    });
+  }
+</script>
+
+</body>
+</html>

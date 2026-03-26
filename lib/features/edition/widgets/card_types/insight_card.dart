@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 
-/// An insight card for ~30-second reads.
+/// Insight card — Minimal Luxury design.
 ///
 /// Layout:
-/// - Bold title
-/// - 3-4 sentence body with comfortable line height
-/// - Optional decorative icon
-/// - Light purple-tinted background
+/// - Pill badge "Insight" in dusty blue
+/// - Topic in small caps
+/// - Title in Playfair Display
+/// - Body in Inter with generous line-height
+/// - Key Takeaway section at bottom
 class InsightCard extends StatelessWidget {
   const InsightCard({super.key, required this.card});
 
@@ -16,36 +18,59 @@ class InsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.insight.withOpacity(0.04),
-      ),
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Decorative icon
+          // Pill badge
           Container(
-            width: 40,
-            height: 40,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.insight.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
-              Icons.lightbulb_outline_rounded,
-              color: AppColors.insight,
-              size: 22,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline_rounded,
+                  size: 14,
+                  color: AppColors.insight,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Insight',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.insight,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
 
+          // Topic in small caps
+          Text(
+            card.topic.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+
           // Title
           Text(
             card.title,
-            style: const TextStyle(
-              fontSize: 22,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 24,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
               height: 1.3,
@@ -59,24 +84,81 @@ class InsightCard extends StatelessWidget {
               physics: const ClampingScrollPhysics(),
               child: Text(
                 card.body,
-                style: const TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary,
-                  height: 1.7,
+                  height: 1.8,
                 ),
               ),
             ),
           ),
 
+          // Key Takeaway section
+          if (card.summary != null && card.summary!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.insight.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border(
+                  left: BorderSide(
+                    color: AppColors.insight.withOpacity(0.4),
+                    width: 3,
+                  ),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.lightbulb_rounded,
+                    size: 18,
+                    color: AppColors.insight.withOpacity(0.7),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Key Takeaway',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.insight,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          card.summary!,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // Source
           if (card.sourceName != null && card.sourceName!.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
-              'Source: ${card.sourceName}',
-              style: const TextStyle(
+              '\u2014 ${card.sourceName}',
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.italic,
                 color: AppColors.textMuted,
               ),
             ),

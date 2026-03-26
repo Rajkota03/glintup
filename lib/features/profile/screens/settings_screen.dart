@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/core/constants/app_constants.dart';
 import 'package:glintup/core/network/supabase_client.dart';
 import 'package:glintup/features/profile/screens/profile_screen.dart';
 
 /// ──────────────────────────────────────────────────────────────
-/// Settings Screen
-///
-/// Sections:
-///   - Account: Edit name, phone number (read-only)
-///   - Notifications: Toggle on/off, change time
-///   - Topics: Manage topics
-///   - About: App version, Terms, Privacy, Licenses
-///   - Danger Zone: Delete account
+/// Settings Screen — Minimal Luxury + Warm Editorial
 /// ──────────────────────────────────────────────────────────────
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -32,12 +26,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final profile = ref.watch(userProfileProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Settings'),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
+        title: Text(
+          'Settings',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: ListView(
         children: [
@@ -50,90 +59,140 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             error: (_, __) => const SizedBox.shrink(),
             data: (p) => Column(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.person_outline_rounded),
-                  title: const Text('Name'),
-                  subtitle: Text(p?['first_name'] ?? 'Not set'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                _SettingsTile(
+                  icon: Icons.person_outline,
+                  iconColor: AppColors.primary,
+                  title: 'Name',
+                  subtitle: p?['first_name'] ?? 'Not set',
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textTertiary,
+                  ),
                   onTap: () => _showEditNameDialog(
                     context,
                     p?['first_name'] ?? '',
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.phone_outlined),
-                  title: const Text('Phone Number'),
-                  subtitle: Text(
-                    SupabaseConfig.currentUser?.phone ?? 'Not set',
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(
+                    height: 1,
+                    color: AppColors.divider,
                   ),
+                ),
+                _SettingsTile(
+                  icon: Icons.phone_outlined,
+                  iconColor: AppColors.primary,
+                  title: 'Phone Number',
+                  subtitle: SupabaseConfig.currentUser?.phone ?? 'Not set',
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // ── Notifications ────────────────────────────────
           _SectionHeader(title: 'Notifications'),
-          SwitchListTile(
-            secondary: const Icon(Icons.notifications_outlined),
-            title: const Text('Daily Edition Notifications'),
-            subtitle: const Text('Get notified when your edition is ready'),
-            value: _notificationsEnabled,
-            activeColor: AppColors.primary,
-            onChanged: (value) {
-              setState(() => _notificationsEnabled = value);
-            },
+          _SettingsTile(
+            icon: Icons.notifications_outlined,
+            iconColor: AppColors.primary,
+            title: 'Daily Edition Notifications',
+            subtitle: 'Get notified when your edition is ready',
+            trailing: Switch(
+              value: _notificationsEnabled,
+              activeTrackColor: AppColors.primary,
+              onChanged: (value) {
+                setState(() => _notificationsEnabled = value);
+              },
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.access_time_rounded),
-            title: const Text('Notification Time'),
-            subtitle: Text(_notificationTime.format(context)),
-            trailing: const Icon(Icons.chevron_right_rounded),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _SettingsTile(
+            icon: Icons.access_time_outlined,
+            iconColor: AppColors.primary,
+            title: 'Notification Time',
+            subtitle: _notificationTime.format(context),
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             enabled: _notificationsEnabled,
             onTap: _notificationsEnabled
                 ? () => _showTimePicker(context)
                 : null,
           ),
-          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // ── Topics ───────────────────────────────────────
           _SectionHeader(title: 'Topics'),
-          ListTile(
-            leading: const Icon(Icons.topic_rounded),
-            title: const Text('Manage Topics'),
-            subtitle: const Text('Choose what you want to learn about'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+          _SettingsTile(
+            icon: Icons.topic_outlined,
+            iconColor: AppColors.primary,
+            title: 'Manage Topics',
+            subtitle: 'Choose what you want to learn about',
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () => context.push('/onboarding/topics'),
           ),
-          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // ── About ────────────────────────────────────────
           _SectionHeader(title: 'About'),
-          ListTile(
-            leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('App Version'),
-            subtitle: const Text('${AppConstants.appName} v1.0.0'),
+          _SettingsTile(
+            icon: Icons.info_outline_rounded,
+            iconColor: AppColors.primary,
+            title: 'App Version',
+            subtitle: '${AppConstants.appName} v1.0.0',
           ),
-          ListTile(
-            leading: const Icon(Icons.description_outlined),
-            title: const Text('Terms of Service'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _SettingsTile(
+            icon: Icons.description_outlined,
+            iconColor: AppColors.primary,
+            title: 'Terms of Service',
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               // TODO: Open terms URL
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy Policy'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _SettingsTile(
+            icon: Icons.privacy_tip_outlined,
+            iconColor: AppColors.primary,
+            title: 'Privacy Policy',
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               // TODO: Open privacy URL
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.source_outlined),
-            title: const Text('Open Source Licenses'),
-            trailing: const Icon(Icons.chevron_right_rounded),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(height: 1, color: AppColors.divider),
+          ),
+          _SettingsTile(
+            icon: Icons.source_outlined,
+            iconColor: AppColors.primary,
+            title: 'Open Source Licenses',
+            trailing: const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
             onTap: () {
               showLicensePage(
                 context: context,
@@ -142,21 +201,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               );
             },
           ),
-          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // ── Danger Zone ──────────────────────────────────
           _SectionHeader(title: 'Danger Zone', isDestructive: true),
-          ListTile(
-            leading: const Icon(Icons.delete_forever_rounded,
-                color: AppColors.error),
-            title: const Text(
-              'Delete Account',
-              style: TextStyle(color: AppColors.error),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextButton(
+              onPressed: () => _showDeleteAccountDialog(context),
+              child: Text(
+                'Delete Account',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.error.withValues(alpha: 0.7),
+                ),
+              ),
             ),
-            subtitle: const Text('Permanently delete your account and data'),
-            onTap: () => _showDeleteAccountDialog(context),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -237,12 +301,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (confirmed == true && mounted) {
-      // Account deletion will be handled via Supabase Edge Function
-      // once auth is set up. For now, just show a confirmation.
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Account deletion will be available after auth is set up.'),
+            content: Text(
+                'Account deletion will be available after auth is set up.'),
           ),
         );
       }
@@ -266,13 +329,69 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
+        style: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: isDestructive ? AppColors.error : AppColors.textMuted,
-          letterSpacing: 1.2,
+          color: isDestructive
+              ? AppColors.error.withValues(alpha: 0.7)
+              : AppColors.textTertiary,
+          letterSpacing: 1.5,
         ),
       ),
+    );
+  }
+}
+
+/// Custom settings tile with warm editorial styling.
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool enabled;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: enabled
+            ? iconColor.withValues(alpha: 0.7)
+            : AppColors.textTertiary.withValues(alpha: 0.4),
+        size: 22,
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: enabled ? AppColors.textPrimary : AppColors.textTertiary,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle!,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.textTertiary,
+              ),
+            )
+          : null,
+      trailing: trailing,
+      onTap: onTap,
+      enabled: enabled,
     );
   }
 }

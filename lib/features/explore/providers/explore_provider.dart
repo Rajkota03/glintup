@@ -1,22 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glintup/core/constants/app_constants.dart';
 import 'package:glintup/core/network/supabase_client.dart';
+import 'package:glintup/core/demo/demo_data.dart';
 import 'package:glintup/data/models/card_model.dart';
 import 'package:glintup/data/models/topic_model.dart';
 
 // ──────────────────────────────────────────────────────────────
-// Topics — real Supabase query
+// Topics — tries Supabase, falls back to demo data
 // ──────────────────────────────────────────────────────────────
 final topicsProvider = FutureProvider<List<TopicModel>>((ref) async {
-  final response = await SupabaseConfig.client
-      .from('topics')
-      .select()
-      .eq('is_active', true)
-      .order('sort_order', ascending: true);
+  try {
+    final response = await SupabaseConfig.client
+        .from('topics')
+        .select()
+        .eq('is_active', true)
+        .order('sort_order', ascending: true);
 
-  return (response as List<dynamic>)
-      .map((e) => TopicModel.fromJson(e as Map<String, dynamic>))
-      .toList();
+    return (response as List<dynamic>)
+        .map((e) => TopicModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    return DemoData.getSampleTopics();
+  }
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -29,17 +34,24 @@ final selectedTopicProvider = StateProvider<String?>((ref) => null);
 // ──────────────────────────────────────────────────────────────
 final exploreCardsProvider =
     FutureProvider.family<List<CardModel>, String>((ref, topic) async {
-  final response = await SupabaseConfig.client
-      .from('cards')
-      .select()
-      .eq('status', 'published')
-      .eq('topic', topic)
-      .order('published_at', ascending: false)
-      .limit(AppConstants.explorePageSize);
+  try {
+    final response = await SupabaseConfig.client
+        .from('cards')
+        .select()
+        .eq('status', 'published')
+        .eq('topic', topic)
+        .order('published_at', ascending: false)
+        .limit(AppConstants.explorePageSize);
 
-  return (response as List<dynamic>)
-      .map((e) => CardModel.fromJson(e as Map<String, dynamic>))
-      .toList();
+    return (response as List<dynamic>)
+        .map((e) => CardModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    // Return demo cards filtered by the requested topic.
+    return DemoData.getSampleCards()
+        .where((c) => c.topic == topic)
+        .toList();
+  }
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -85,14 +97,18 @@ class RabbitHoleModel {
 
 final rabbitHolesProvider =
     FutureProvider<List<RabbitHoleModel>>((ref) async {
-  final response = await SupabaseConfig.client
-      .from('rabbit_holes')
-      .select()
-      .order('created_at', ascending: false);
+  try {
+    final response = await SupabaseConfig.client
+        .from('rabbit_holes')
+        .select()
+        .order('created_at', ascending: false);
 
-  return (response as List<dynamic>)
-      .map((e) => RabbitHoleModel.fromJson(e as Map<String, dynamic>))
-      .toList();
+    return (response as List<dynamic>)
+        .map((e) => RabbitHoleModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    return DemoData.getSampleRabbitHoles();
+  }
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -104,17 +120,27 @@ final searchResultsProvider = FutureProvider<List<CardModel>>((ref) async {
   final query = ref.watch(searchQueryProvider);
   if (query.trim().isEmpty) return [];
 
-  final pattern = '%${query.trim()}%';
+  try {
+    final pattern = '%${query.trim()}%';
 
-  final response = await SupabaseConfig.client
-      .from('cards')
-      .select()
-      .eq('status', 'published')
-      .or('title.ilike.$pattern,body.ilike.$pattern')
-      .order('published_at', ascending: false)
-      .limit(AppConstants.explorePageSize);
+    final response = await SupabaseConfig.client
+        .from('cards')
+        .select()
+        .eq('status', 'published')
+        .or('title.ilike.$pattern,body.ilike.$pattern')
+        .order('published_at', ascending: false)
+        .limit(AppConstants.explorePageSize);
 
-  return (response as List<dynamic>)
-      .map((e) => CardModel.fromJson(e as Map<String, dynamic>))
-      .toList();
+    return (response as List<dynamic>)
+        .map((e) => CardModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    // Search demo cards locally.
+    final q = query.trim().toLowerCase();
+    return DemoData.getSampleCards()
+        .where((c) =>
+            c.title.toLowerCase().contains(q) ||
+            c.body.toLowerCase().contains(q))
+        .toList();
+  }
 });

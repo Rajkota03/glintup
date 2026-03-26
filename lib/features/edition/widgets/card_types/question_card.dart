@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 
-/// An interactive question card with tappable answer options.
+/// Question card — Minimal Luxury design.
 ///
 /// Layout:
-/// - Question text prominently displayed
-/// - 4 answer options as tappable cards/buttons
-/// - On tap: highlight selected answer
-///   - Correct: green background, checkmark, explanation
-///   - Wrong: red on selected, green on correct, explanation
-/// - Animated transitions between states
+/// - Pill badge "Question" in terracotta
+/// - Question text in Playfair Display (22px)
+/// - 4 answer options as elegant bordered containers
+///   - Letters (A, B, C, D) in gold circles
+///   - Correct: forest green border/tint, checkmark
+///   - Wrong: muted red border, correct highlighted green
+/// - Explanation revealed with smooth animation, forest green left border
 class QuestionCard extends StatefulWidget {
   const QuestionCard({super.key, required this.card});
 
@@ -70,36 +72,47 @@ class _QuestionCardState extends State<QuestionCard>
     final questionText =
         widget.card.questionText ?? widget.card.title;
 
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.question.withOpacity(0.04),
-      ),
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Decorative icon
+          // Pill badge
           Container(
-            width: 40,
-            height: 40,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.question.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
-              Icons.quiz_rounded,
-              color: AppColors.question,
-              size: 22,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.help_outline_rounded,
+                  size: 14,
+                  color: AppColors.question,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Question',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.question,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // Question text
           Text(
             questionText,
-            style: const TextStyle(
-              fontSize: 20,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 22,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
               height: 1.3,
@@ -138,13 +151,15 @@ class _QuestionCardState extends State<QuestionCard>
                           color: (_selectedIndex == _correctIndex
                                   ? AppColors.success
                                   : AppColors.question)
-                              .withOpacity(0.08),
+                              .withOpacity(0.06),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: (_selectedIndex == _correctIndex
-                                    ? AppColors.success
-                                    : AppColors.question)
-                                .withOpacity(0.2),
+                          border: Border(
+                            left: BorderSide(
+                              color: _selectedIndex == _correctIndex
+                                  ? AppColors.success
+                                  : AppColors.question,
+                              width: 3,
+                            ),
                           ),
                         ),
                         child: Column(
@@ -166,7 +181,7 @@ class _QuestionCardState extends State<QuestionCard>
                                   _selectedIndex == _correctIndex
                                       ? 'Correct!'
                                       : 'Not quite',
-                                  style: TextStyle(
+                                  style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: _selectedIndex == _correctIndex
@@ -179,11 +194,11 @@ class _QuestionCardState extends State<QuestionCard>
                             const SizedBox(height: 8),
                             Text(
                               widget.card.correctAnswerExplanation!,
-                              style: const TextStyle(
+                              style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.textSecondary,
-                                height: 1.5,
+                                height: 1.6,
                               ),
                             ),
                           ],
@@ -201,7 +216,7 @@ class _QuestionCardState extends State<QuestionCard>
   }
 }
 
-/// A single answer option button.
+/// A single answer option — elegant bordered container with gold letter circle.
 class _AnswerOption extends StatelessWidget {
   final int index;
   final String text;
@@ -219,26 +234,24 @@ class _AnswerOption extends StatelessWidget {
     required this.onTap,
   });
 
-  String get _label => String.fromCharCode(65 + index); // A, B, C, D
+  String get _label => String.fromCharCode(65 + index);
 
   Color get _backgroundColor {
     if (!answered) return Colors.white;
-    if (isCorrect) return AppColors.success.withOpacity(0.1);
-    if (isSelected) return AppColors.error.withOpacity(0.1);
+    if (isCorrect) return AppColors.success.withOpacity(0.06);
+    if (isSelected) return AppColors.error.withOpacity(0.06);
     return Colors.white;
   }
 
   Color get _borderColor {
-    if (!answered) {
-      return Colors.grey.shade300;
-    }
-    if (isCorrect) return AppColors.success.withOpacity(0.4);
-    if (isSelected) return AppColors.error.withOpacity(0.4);
-    return Colors.grey.shade200;
+    if (!answered) return AppColors.border;
+    if (isCorrect) return AppColors.success.withOpacity(0.5);
+    if (isSelected) return AppColors.error.withOpacity(0.5);
+    return AppColors.border.withOpacity(0.5);
   }
 
-  Color get _labelColor {
-    if (!answered) return AppColors.question;
+  Color get _circleColor {
+    if (!answered) return AppColors.primary;
     if (isCorrect) return AppColors.success;
     if (isSelected) return AppColors.error;
     return AppColors.textMuted;
@@ -260,14 +273,14 @@ class _AnswerOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Letter label
+            // Gold circle letter
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: _labelColor.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(8),
+                color: _circleColor.withOpacity(0.12),
+                shape: BoxShape.circle,
               ),
               child: Center(
                 child: answered && isCorrect
@@ -278,10 +291,10 @@ class _AnswerOption extends StatelessWidget {
                             size: 18, color: AppColors.error)
                         : Text(
                             _label,
-                            style: TextStyle(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: _labelColor,
+                              color: _circleColor,
                             ),
                           ),
               ),
@@ -292,7 +305,7 @@ class _AnswerOption extends StatelessWidget {
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight:
                       answered && (isCorrect || isSelected)

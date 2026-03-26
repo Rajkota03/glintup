@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glintup/core/network/supabase_client.dart';
+import 'package:glintup/core/demo/demo_data.dart';
 import 'package:glintup/data/models/edition_model.dart';
-import 'package:glintup/data/models/card_model.dart';
 import 'package:glintup/data/repositories/edition_repository.dart';
 
 // ---------------------------------------------------------------------------
@@ -12,36 +12,48 @@ final editionRepositoryProvider = Provider<EditionRepository>((ref) {
 });
 
 // ---------------------------------------------------------------------------
-// Today's edition — real Supabase data
+// Today's edition — tries Supabase, falls back to demo data on any error
 // ---------------------------------------------------------------------------
 final todayEditionProvider = FutureProvider.family<
     ({EditionModel? edition, List<EditionCardModel> cards}), String>(
   (ref, tier) async {
-    final repo = ref.read(editionRepositoryProvider);
-    final userId = SupabaseConfig.userId;
+    try {
+      final repo = ref.read(editionRepositoryProvider);
+      final userId = SupabaseConfig.userId;
 
-    // 1. Call the RPC function to assemble the edition (if needed).
-    if (userId != null) {
-      try {
-        await SupabaseConfig.client.rpc('assemble_edition', params: {
-          'p_user_id': userId,
-          'p_tier': 'free',
-        });
-      } catch (_) {
-        // RPC may not exist or may fail — we continue to fetch anyway.
+      // 1. Call the RPC function to assemble the edition (if needed).
+      if (userId != null) {
+        try {
+          await SupabaseConfig.client.rpc('assemble_edition', params: {
+            'p_user_id': userId,
+            'p_tier': 'free',
+          });
+        } catch (_) {
+          // RPC may not exist or may fail — we continue to fetch anyway.
+        }
       }
+
+      // 2. Fetch today's edition.
+      final edition = await repo.getTodayEdition('free');
+      if (edition == null) {
+        // No edition for today — return demo data so the UI is never empty.
+        return (
+          edition: DemoData.getSampleEdition(),
+          cards: DemoData.getSampleEditionCards(),
+        );
+      }
+
+      // 3. Fetch edition cards.
+      final cards = await repo.getEditionCards(edition.id);
+
+      return (edition: edition, cards: cards);
+    } catch (_) {
+      // Supabase table missing, network error, etc. — show demo content.
+      return (
+        edition: DemoData.getSampleEdition(),
+        cards: DemoData.getSampleEditionCards(),
+      );
     }
-
-    // 2. Fetch today's edition.
-    final edition = await repo.getTodayEdition('free');
-    if (edition == null) {
-      return (edition: null, cards: <EditionCardModel>[]);
-    }
-
-    // 3. Fetch edition cards.
-    final cards = await repo.getEditionCards(edition.id);
-
-    return (edition: edition, cards: cards);
   },
 );
 

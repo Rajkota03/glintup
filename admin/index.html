@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glintup Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f23;
+  --sidebar: #1a1a2e;
+  --card: #16213e;
+  --border: #2a2a4a;
+  --gold: #C8A951;
+  --gold-dim: #9a7f3a;
+  --text: #ffffff;
+  --text-sec: #8888aa;
+  --green: #4ade80;
+  --yellow: #facc15;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --pink: #f472b6;
+  --radius: 12px;
+  --sidebar-w: 260px;
+}
+html { font-size: 14px; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { color: var(--gold); text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select {
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .2s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+textarea { resize: vertical; }
+select option { background: var(--bg); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+.sidebar-logo {
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .sparkle {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--gold), #e8d48b);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  animation: sparkle-pulse 2s ease-in-out infinite;
+}
+@keyframes sparkle-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(200,169,81,.3); }
+  50% { box-shadow: 0 0 20px rgba(200,169,81,.6); }
+}
+.sidebar-logo span { font-weight: 700; font-size: 1.15rem; letter-spacing: -.5px; }
+.sidebar nav { flex: 1; padding: 12px 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px;
+  color: var(--text-sec);
+  font-size: .95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(200,169,81,.05); }
+.nav-item.active {
+  color: var(--gold);
+  background: rgba(200,169,81,.08);
+  border-left-color: var(--gold);
+}
+.nav-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  font-size: .8rem;
+  color: var(--text-sec);
+}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: 0;
+  min-height: 100vh;
+}
+.topbar {
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15,15,35,.8);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar h1 { font-size: 1.3rem; font-weight: 700; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+.page { display: none; padding: 32px; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+/* Stat cards */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.stat-card .label { font-size: .8rem; color: var(--text-sec); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.stat-card .value { font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+.stat-card .sub { font-size: .8rem; color: var(--text-sec); margin-top: 4px; }
+
+/* Health badge */
+.health-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: .9rem;
+}
+.health-green { background: rgba(74,222,128,.15); color: var(--green); }
+.health-yellow { background: rgba(250,204,21,.15); color: var(--yellow); }
+.health-red { background: rgba(248,113,113,.15); color: var(--red); animation: pulse-red 1.5s ease-in-out infinite; }
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248,113,113,.3); }
+  50% { box-shadow: 0 0 0 8px rgba(248,113,113,0); }
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: .85rem;
+  transition: all .2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-gold { background: var(--gold); color: #1a1a2e; }
+.btn-gold:hover { background: #d4b85e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,169,81,.3); }
+.btn-ghost { background: transparent; color: var(--text-sec); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-green { background: rgba(74,222,128,.15); color: var(--green); border: 1px solid rgba(74,222,128,.3); }
+.btn-green:hover { background: rgba(74,222,128,.25); }
+.btn-red { background: rgba(248,113,113,.15); color: var(--red); border: 1px solid rgba(248,113,113,.3); }
+.btn-red:hover { background: rgba(248,113,113,.25); }
+.btn-sm { padding: 5px 12px; font-size: .78rem; }
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.badge-published { background: rgba(74,222,128,.15); color: var(--green); }
+.badge-approved { background: rgba(74,222,128,.15); color: var(--green); }
+.badge-review { background: rgba(250,204,21,.15); color: var(--yellow); }
+.badge-draft { background: rgba(136,136,170,.15); color: var(--text-sec); }
+.badge-archived { background: rgba(248,113,113,.15); color: var(--red); }
+.badge-type {
+  background: rgba(96,165,250,.1);
+  color: var(--blue);
+  border: 1px solid rgba(96,165,250,.2);
+}
+
+/* Tables */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-sec);
+  background: rgba(0,0,0,.2);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  font-size: .9rem;
+  border-bottom: 1px solid rgba(42,42,74,.5);
+}
+tr:hover td { background: rgba(200,169,81,.03); }
+tr:nth-child(even) td { background: rgba(0,0,0,.1); }
+tr:nth-child(even):hover td { background: rgba(200,169,81,.05); }
+
+/* Cards / panels */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.panel-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--gold);
+}
+
+/* Bar charts */
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: flex; align-items: center; gap: 12px; }
+.bar-label { width: 100px; font-size: .85rem; color: var(--text-sec); text-align: right; flex-shrink: 0; }
+.bar-track { flex: 1; height: 28px; background: rgba(0,0,0,.2); border-radius: 6px; overflow: hidden; position: relative; }
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: white;
+  transition: width .6s ease;
+  min-width: fit-content;
+}
+
+/* Filter bar */
+.filter-bar {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 20px;
+}
+.filter-bar select, .filter-bar input[type="text"] { min-width: 150px; }
+.search-input {
+  position: relative;
+}
+.search-input input { padding-left: 32px; min-width: 220px; }
+.search-input::before {
+  content: '\1F50D';
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: .85rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex; gap: 6px; align-items: center; justify-content: center;
+  margin-top: 16px;
+}
+.pagination button {
+  padding: 6px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-sec);
+  border-radius: 6px;
+  font-size: .85rem;
+}
+.pagination button.active { background: var(--gold); color: var(--sidebar); border-color: var(--gold); font-weight: 600; }
+.pagination button:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--sidebar);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+  animation: modalIn .2s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(.95); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.modal-header h2 { font-size: 1.2rem; font-weight: 700; }
+.modal-close {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-sec);
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 500;
+  animation: toastIn .3s ease, toastOut .3s ease 2.7s;
+  max-width: 360px;
+}
+.toast-success { background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.3); color: var(--green); }
+.toast-error { background: rgba(248,113,113,.15); border: 1px solid rgba(248,113,113,.3); color: var(--red); }
+.toast-info { background: rgba(96,165,250,.15); border: 1px solid rgba(96,165,250,.3); color: var(--blue); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(40px); } }
+@keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, var(--card) 25%, rgba(200,169,81,.08) 50%, var(--card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.shimmer-line { height: 16px; margin-bottom: 8px; }
+.shimmer-block { height: 100px; }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-sec);
+}
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: .5; }
+.empty-state p { font-size: .95rem; }
+
+/* Form groups */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: .8rem; font-weight: 600; color: var(--text-sec); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; }
+
+/* Checkbox group */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+.checkbox-label {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: all .2s;
+}
+.checkbox-label:hover { border-color: var(--gold); }
+.checkbox-label input[type="checkbox"] { display: none; }
+.checkbox-label.checked { background: rgba(200,169,81,.1); border-color: var(--gold); color: var(--gold); }
+
+/* Range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  border: none;
+  padding: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  background: var(--gold);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Stars */
+.stars { color: var(--gold); letter-spacing: 1px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+.tab {
+  padding: 10px 18px;
+  border: none;
+  background: none;
+  color: var(--text-sec);
+  font-weight: 500;
+  font-size: .9rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  margin-bottom: -1px;
+}
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* Card preview mini */
+.card-preview {
+  background: linear-gradient(135deg, #1e2744, #16213e);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-width: 340px;
+}
+.card-preview .cp-type { font-size: .7rem; text-transform: uppercase; color: var(--gold); font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+.card-preview .cp-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+.card-preview .cp-body { font-size: .85rem; color: var(--text-sec); line-height: 1.5; }
+.card-preview .cp-meta { margin-top: 12px; display: flex; gap: 12px; font-size: .75rem; color: var(--text-sec); }
+
+/* SQL code block */
+.sql-block {
+  background: #0a0a1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: #a5d6ff;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .sidebar { width: 60px; }
+  .sidebar-logo span, .nav-item span, .sidebar-footer { display: none; }
+  .sidebar-logo { justify-content: center; padding: 16px 8px; }
+  .nav-item { justify-content: center; padding: 14px 8px; }
+  .main { margin-left: 60px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sparkle">&#10024;</div>
+    <span>Glintup Admin</span>
+  </div>
+  <nav>
+    <div class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+      <span class="icon">&#128202;</span>
+      <span>Dashboard</span>
+    </div>
+    <div class="nav-item" data-page="content" onclick="switchPage('content')">
+      <span class="icon">&#128221;</span>
+      <span>Content Manager</span>
+    </div>
+    <div class="nav-item" data-page="generator" onclick="switchPage('generator')">
+      <span class="icon">&#129302;</span>
+      <span>AI Generator</span>
+    </div>
+    <div class="nav-item" data-page="editions" onclick="switchPage('editions')">
+      <span class="icon">&#128230;</span>
+      <span>Editions</span>
+    </div>
+    <div class="nav-item" data-page="users" onclick="switchPage('users')">
+      <span class="icon">&#128101;</span>
+      <span>Users</span>
+    </div>
+    <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
+      <span class="icon">&#9881;</span>
+      <span>Settings</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    Glintup Admin v1.0<br>
+    <span style="color:var(--gold)">&#9679;</span> Connected to Supabase
+  </div>
+</aside>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="page-title">Dashboard</h1>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="openMigrationModal()">&#128736; Setup Database</button>
+      <button class="btn btn-gold" onclick="refreshCurrentPage()">&#8635; Refresh</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: DASHBOARD
+       ============================================================ -->
+  <div class="page active" id="page-dashboard">
+    <!-- Stats row -->
+    <div class="stats-row" id="dash-stats">
+      <div class="stat-card">
+        <div class="label">Total Cards</div>
+        <div class="value" id="stat-total">--</div>
+        <div class="sub">All card statuses</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Published</div>
+        <div class="value" id="stat-published">--</div>
+        <div class="sub">Ready to serve</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">In Review</div>
+        <div class="value" id="stat-review">--</div>
+        <div class="sub">Draft + Review</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Content Buffer</div>
+        <div class="value" id="stat-buffer">--</div>
+        <div class="sub" id="stat-buffer-sub">days of content</div>
+      </div>
+    </div>
+
+    <!-- Content health -->
+    <div class="panel" style="margin-bottom: 20px">
+      <div class="panel-title">&#9889; Content Health</div>
+      <div id="health-badge-wrap"></div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Cards by topic -->
+      <div class="panel">
+        <div class="panel-title">&#128202; Cards by Topic</div>
+        <div class="bar-chart" id="topic-chart"></div>
+      </div>
+      <!-- Cards by type -->
+      <div class="panel">
+        <div class="panel-title">&#127922; Cards by Type</div>
+        <div class="bar-chart" id="type-chart"></div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="panel">
+      <div class="panel-title">&#128337; Recent Activity</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Title</th><th>Type</th><th>Topic</th><th>Status</th><th>Created</th></tr></thead>
+          <tbody id="recent-activity"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: CONTENT MANAGER
+       ============================================================ -->
+  <div class="page" id="page-content">
+    <div class="filter-bar">
+      <select id="filter-topic" onchange="loadCards()">
+        <option value="">All Topics</option>
+        <option value="science">Science</option>
+        <option value="history">History</option>
+        <option value="psychology">Psychology</option>
+        <option value="technology">Technology</option>
+        <option value="arts">Arts</option>
+        <option value="business">Business</option>
+        <option value="nature">Nature</option>
+        <option value="space">Space</option>
+      </select>
+      <select id="filter-type" onchange="loadCards()">
+        <option value="">All Types</option>
+        <option value="quick_fact">Quick Fact</option>
+        <option value="insight">Insight</option>
+        <option value="visual">Visual</option>
+        <option value="story">Story</option>
+        <option value="deep_read">Deep Read</option>
+        <option value="question">Question</option>
+        <option value="quote">Quote</option>
+      </select>
+      <select id="filter-status" onchange="loadCards()">
+        <option value="">All Statuses</option>
+        <option value="draft">Draft</option>
+        <option value="review">Review</option>
+        <option value="approved">Approved</option>
+        <option value="published">Published</option>
+        <option value="archived">Archived</option>
+      </select>
+      <div class="search-input">
+        <input type="text" id="filter-search" placeholder="Search cards..." oninput="debounce(loadCards, 400)()">
+      </div>
+      <div style="margin-left:auto; display:flex; gap:8px;">
+        <button class="btn btn-green btn-sm" onclick="bulkAction('published')">&#10004; Publish Selected</button>
+        <button class="btn btn-red btn-sm" onclick="bulkAction('archived')">&#128465; Archive Selected</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Topic</th>
+            <th>Status</th>
+            <th>Quality</th>
+            <th>Difficulty</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cards-table"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="cards-pagination"></div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: AI GENERATOR
+       ============================================================ -->
+  <div class="page" id="page-generator">
+    <div class="tabs">
+      <button class="tab active" onclick="switchGenTab('generate')">Generate Cards</button>
+      <button class="tab" onclick="switchGenTab('prompts')">Prompt Config</button>
+      <button class="tab" onclick="switchGenTab('history')">Generation History</button>
+    </div>
+
+    <!-- Generate tab -->
+    <div id="gen-tab-generate">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">&#9889; Generate New Cards</div>
+          <div class="form-group">
+            <label>Topic</label>
+            <select id="gen-topic">
+              <option value="science">Science</option>
+              <option value="history">History</option>
+              <option value="psychology">Psychology</option>
+              <option value="technology">Technology</option>
+              <option value="arts">Arts</option>
+              <option value="business">Business</option>
+              <option value="nature">Nature</option>
+              <option value="space">Space</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Card Types</label>
+            <div class="checkbox-group" id="gen-card-types">
+              <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="quick_fact" checked> Quick Fact</label>
+              <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="insight" checked> Insight</label>
+              <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="visual"> Visual</label>
+              <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="story" checked> Story</label>
+              <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="deep_read"> Deep Read</label>
+              <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="question"> Question</label>
+              <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="quote"> Quote</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Count: <span id="gen-count-val">5</span></label>
+            <input type="range" id="gen-count" min="1" max="20" value="5" oninput="document.getElementById('gen-count-val').textContent=this.value">
+          </div>
+          <div class="form-group">
+            <label>Difficulty Range</label>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <select id="gen-diff-min"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
+              <span style="color:var(--text-sec)">to</span>
+              <select id="gen-diff-max"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Custom Instructions (optional)</label>
+            <textarea id="gen-instructions" rows="3" placeholder="Any special instructions for this batch..."></textarea>
+          </div>
+          <button class="btn btn-gold" onclick="generateCards()" id="gen-btn">
+            &#129302; Generate Cards
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">&#128203; Generated Cards</div>
+          <div id="gen-results">
+            <div class="empty-state">
+              <div class="empty-icon">&#129302;</div>
+              <p>Configure and run a generation to see results here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompts tab -->
+    <div id="gen-tab-prompts" style="display:none">
+      <div class="panel">
+        <div class="panel-title">&#128221; System Prompts by Topic</div>
+        <p style="color:var(--text-sec);margin-bottom:16px;font-size:.9rem;">Configure the AI system prompt for each topic. These prompts are sent to the AI when generating content.</p>
+        <div id="prompt-editors"></div>
+      </div>
+    </div>
+
+    <!-- History tab -->
+    <div id="gen-tab-history" style="display:none">
+      <div class="panel">
+        <div class="panel-title">&#128337; Generation History</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Topic</th><th>Types</th><th>Requested</th><th>Generated</th><th>Published</th><th>Duration</th><th>Status</th></tr></thead>
+            <tbody id="gen-history-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: EDITIONS
+       ============================================================ -->
+  <div class="page" id="page-editions">
+    <div class="filter-bar">
+      <div class="form-group" style="margin-bottom:0">
+        <label style="margin-bottom:4px">Select Date</label>
+        <input type="date" id="edition-date" onchange="loadEditions()">
+      </div>
+      <div style="margin-left:20px">
+        <div id="edition-summary" style="color:var(--text-sec);font-size:.9rem;"></div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="edition-stats" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="label">Editions Today</div>
+        <div class="value" id="ed-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Cards/Edition</div>
+        <div class="value" id="ed-avg-cards">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Completion Rate</div>
+        <div class="value" id="ed-completion">0%</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>User</th><th>Date</th><th>Cards</th><th>Status</th><th>Assembled</th><th></th></tr></thead>
+        <tbody id="editions-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: USERS
+       ============================================================ -->
+  <div class="page" id="page-users">
+    <div class="filter-bar">
+      <div class="search-input">
+        <input type="text" id="user-search" placeholder="Search users..." oninput="debounce(loadUsers, 400)()">
+      </div>
+      <select id="user-sort" onchange="loadUsers()">
+        <option value="created_at">Sort by: Joined</option>
+        <option value="xp_points">Sort by: XP</option>
+        <option value="current_streak">Sort by: Streak</option>
+        <option value="total_cards_read">Sort by: Cards Read</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Topics</th><th>Streak</th><th>Cards Read</th><th>XP</th><th>Level</th><th>Joined</th><th></th></tr></thead>
+        <tbody id="users-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE: SETTINGS
+       ============================================================ -->
+  <div class="page" id="page-settings">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-title">&#9881; Generation Schedule</div>
+        <div class="form-group">
+          <label>Cards per Day (auto-generation target)</label>
+          <input type="number" id="set-cards-per-day" value="50" min="1" max="200">
+        </div>
+        <div class="form-group">
+          <label>Priority Topics</label>
+          <div class="checkbox-group" id="set-priority-topics">
+            <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="science" checked> Science</label>
+            <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="history" checked> History</label>
+            <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="psychology"> Psychology</label>
+            <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="technology" checked> Technology</label>
+            <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="arts"> Arts</label>
+            <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="business"> Business</label>
+            <label class="checkbox-label" onclick="toggleCheck(this)"><input type="checkbox" value="nature"> Nature</label>
+            <label class="checkbox-label checked" onclick="toggleCheck(this)"><input type="checkbox" value="space" checked> Space</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Quality Threshold for Auto-Publish (1-5)</label>
+          <input type="number" id="set-quality-threshold" value="3" min="1" max="5">
+        </div>
+        <button class="btn btn-gold" onclick="saveSettings()">Save Settings</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">&#128221; Default System Prompt</div>
+        <div class="form-group">
+          <label>Base System Prompt (applies to all topics)</label>
+          <textarea id="set-default-prompt" rows="10" placeholder="Loading..."></textarea>
+        </div>
+        <button class="btn btn-gold" onclick="saveDefaultPrompt()">Save Default Prompt</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">&#128736; Database Info</div>
+      <p style="color:var(--text-sec);font-size:.9rem;margin-bottom:12px;">Connected to Supabase project. Use the "Setup Database" button in the top bar to view migration SQL.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="stat-card" style="flex:1;min-width:150px;">
+          <div class="label">Project URL</div>
+          <div style="font-size:.85rem;color:var(--gold);word-break:break-all;">lmbubuhmodtfpeqgqint.supabase.co</div>
+        </div>
+        <div class="stat-card" style="flex:1;min-width:150px;">
+          <div class="label">Tables</div>
+          <div class="value" style="font-size:1.5rem;">15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Database Migration SQL
+     ============================================================ -->
+<div class="modal-overlay" id="migration-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>&#128736; Database Setup SQL</h2>
+      <button class="modal-close" onclick="closeMigrationModal()">&times;</button>
+    </div>
+    <p style="color:var(--text-sec);margin-bottom:16px;font-size:.9rem;">Copy and run this SQL in your Supabase SQL Editor to create the admin tables.</p>
+    <button class="btn btn-gold btn-sm" onclick="copyMigrationSQL()" style="margin-bottom:12px;">&#128203; Copy to Clipboard</button>
+    <div class="sql-block" id="migration-sql-code"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: Card Detail
+     ============================================================ -->
+<div class="modal-overlay" id="card-modal">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-header">
+      <h2 id="card-modal-title">Card Detail</h2>
+      <button class="modal-close" onclick="closeCardModal()">&times;</button>
+    </div>
+    <div id="card-modal-body"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: User Detail
+     ============================================================ -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="user-modal-title">User Detail</h2>
+      <button class="modal-close" onclick="closeUserModal()">&times;</button>
+    </div>
+    <div id="user-modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ============================================================
+// SUPABASE INIT
+// ============================================================
+const SUPABASE_URL = 'https://lmbubuhmodtfpeqgqint.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnVidWhtb2R0ZnBlcWdxaW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwODc3MTEsImV4cCI6MjA4OTY2MzcxMX0.9sCINuP89HqcaMBwTH5NTfkYoa35yClLxNBLquotX2s';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+let currentPage = 'dashboard';
+let cardsPage = 0;
+const CARDS_PER_PAGE = 20;
+let selectedCardIds = new Set();
+let promptsConfig = null;
+
+const TOPIC_COLORS = {
+  science: '#4CAF50', history: '#FF9800', psychology: '#9C27B0',
+  technology: '#2196F3', arts: '#E91E63', business: '#607D8B',
+  nature: '#66BB6A', space: '#3F51B5'
+};
+
+const MIGRATION_SQL = `-- Content prompts config
+create table if not exists content_prompts (
+  id uuid primary key default uuid_generate_v4(),
+  topic text not null,
+  card_type text,
+  system_prompt text not null,
+  example_output text,
+  tone text default 'curious',
+  target_difficulty int default 3,
+  is_active boolean default true,
+  success_rate numeric default 0,
+  last_used_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_content_prompts_topic on content_prompts (topic);
+
+-- Generation logs
+create table if not exists generation_logs (
+  id uuid primary key default uuid_generate_v4(),
+  topic text not null,
+  card_types text[],
+  cards_requested int not null,
+  cards_generated int default 0,
+  cards_published int default 0,
+  prompt_used text,
+  error_message text,
+  duration_ms int,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_generation_logs_created on generation_logs (created_at desc);`;
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function debounce(fn, ms) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
+function fmtDate(d) {
+  if (!d) return '--';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function fmtDateTime(d) {
+  if (!d) return '--';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+         dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function statusBadge(s) {
+  return `<span class="badge badge-${s}">${s}</span>`;
+}
+
+function typeBadge(t) {
+  return `<span class="badge badge-type">${(t||'').replace(/_/g, ' ')}</span>`;
+}
+
+function starsHtml(score) {
+  const s = Math.min(5, Math.max(0, score || 0));
+  return `<span class="stars">${'&#9733;'.repeat(s)}${'&#9734;'.repeat(5 - s)}</span>`;
+}
+
+function truncate(str, n) {
+  if (!str) return '';
+  return str.length > n ? str.substring(0, n) + '...' : str;
+}
+
+async function safeQuery(queryFn) {
+  try {
+    const { data, error, count } = await queryFn();
+    if (error) {
+      console.warn('Query error:', error.message);
+      return { data: null, count: 0, error };
+    }
+    return { data, count, error: null };
+  } catch (e) {
+    console.warn('Query exception:', e);
+    return { data: null, count: 0, error: e };
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === page));
+  document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-' + page));
+  const titles = { dashboard: 'Dashboard', content: 'Content Manager', generator: 'AI Generator', editions: 'Editions', users: 'Users', settings: 'Settings' };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  refreshCurrentPage();
+}
+
+function refreshCurrentPage() {
+  switch (currentPage) {
+    case 'dashboard': loadDashboard(); break;
+    case 'content': loadCards(); break;
+    case 'generator': loadPrompts(); loadGenHistory(); break;
+    case 'editions': loadEditions(); break;
+    case 'users': loadUsers(); break;
+    case 'settings': loadSettingsPage(); break;
+  }
+}
+
+// ============================================================
+// PAGE: DASHBOARD
+// ============================================================
+async function loadDashboard() {
+  // Total cards
+  const r1 = await safeQuery(() => sb.from('cards').select('*', { count: 'exact', head: true }));
+  const total = r1.count || 0;
+  document.getElementById('stat-total').textContent = total.toLocaleString();
+
+  // Published
+  const r2 = await safeQuery(() => sb.from('cards').select('*', { count: 'exact', head: true }).eq('status', 'published'));
+  const published = r2.count || 0;
+  document.getElementById('stat-published').textContent = published.toLocaleString();
+
+  // In review
+  const r3a = await safeQuery(() => sb.from('cards').select('*', { count: 'exact', head: true }).eq('status', 'draft'));
+  const r3b = await safeQuery(() => sb.from('cards').select('*', { count: 'exact', head: true }).eq('status', 'review'));
+  const review = (r3a.count || 0) + (r3b.count || 0);
+  document.getElementById('stat-review').textContent = review.toLocaleString();
+
+  // Content buffer
+  const buffer = published > 0 ? Math.floor(published / 10) : 0;
+  document.getElementById('stat-buffer').textContent = buffer;
+  document.getElementById('stat-buffer-sub').textContent = `days @ 10 cards/user/day`;
+
+  // Health badge
+  const hWrap = document.getElementById('health-badge-wrap');
+  if (published >= 500) {
+    hWrap.innerHTML = `<div class="health-badge health-green">&#9679; Healthy &mdash; ${published} published cards</div>`;
+  } else if (published >= 200) {
+    hWrap.innerHTML = `<div class="health-badge health-yellow">&#9679; Low &mdash; Generate more content (${published} cards)</div>`;
+  } else {
+    hWrap.innerHTML = `<div class="health-badge health-red">&#9679; Critical &mdash; Generate NOW (${published} cards)</div>`;
+  }
+
+  // Cards by topic
+  const rTopics = await safeQuery(() => sb.from('cards').select('topic').eq('status', 'published'));
+  const topicCounts = {};
+  (rTopics.data || []).forEach(c => { topicCounts[c.topic] = (topicCounts[c.topic] || 0) + 1; });
+  const topicMax = Math.max(1, ...Object.values(topicCounts));
+  const topicChart = document.getElementById('topic-chart');
+  if (Object.keys(topicCounts).length === 0) {
+    topicChart.innerHTML = '<div class="empty-state"><p>No published cards yet</p></div>';
+  } else {
+    topicChart.innerHTML = Object.entries(topicCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([topic, count]) => `
+        <div class="bar-row">
+          <div class="bar-label">${topic}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${(count/topicMax)*100}%;background:${TOPIC_COLORS[topic]||'var(--gold)'};">${count}</div>
+          </div>
+        </div>`).join('');
+  }
+
+  // Cards by type
+  const rTypes = await safeQuery(() => sb.from('cards').select('card_type').eq('status', 'published'));
+  const typeCounts = {};
+  (rTypes.data || []).forEach(c => { typeCounts[c.card_type] = (typeCounts[c.card_type] || 0) + 1; });
+  const typeMax = Math.max(1, ...Object.values(typeCounts));
+  const typeColors = ['#C8A951','#60a5fa','#4ade80','#f472b6','#a78bfa','#facc15','#f87171'];
+  const typeChart = document.getElementById('type-chart');
+  if (Object.keys(typeCounts).length === 0) {
+    typeChart.innerHTML = '<div class="empty-state"><p>No published cards yet</p></div>';
+  } else {
+    typeChart.innerHTML = Object.entries(typeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, count], i) => `
+        <div class="bar-row">
+          <div class="bar-label">${type.replace(/_/g,' ')}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${(count/typeMax)*100}%;background:${typeColors[i%typeColors.length]};">${count}</div>
+          </div>
+        </div>`).join('');
+  }
+
+  // Recent activity
+  const rRecent = await safeQuery(() => sb.from('cards').select('title, card_type, topic, status, created_at').order('created_at', { ascending: false }).limit(10));
+  const tbody = document.getElementById('recent-activity');
+  if (!rRecent.data || rRecent.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No cards yet</p></td></tr>';
+  } else {
+    tbody.innerHTML = rRecent.data.map(c => `
+      <tr>
+        <td>${truncate(c.title, 50)}</td>
+        <td>${typeBadge(c.card_type)}</td>
+        <td><span style="color:${TOPIC_COLORS[c.topic]||'var(--text-sec)'}">${c.topic}</span></td>
+        <td>${statusBadge(c.status)}</td>
+        <td style="color:var(--text-sec)">${fmtDateTime(c.created_at)}</td>
+      </tr>`).join('');
+  }
+}
+
+// ============================================================
+// PAGE: CONTENT MANAGER
+// ============================================================
+async function loadCards() {
+  const topic = document.getElementById('filter-topic').value;
+  const type = document.getElementById('filter-type').value;
+  const status = document.getElementById('filter-status').value;
+  const search = document.getElementById('filter-search').value.trim();
+
+  let query = sb.from('cards').select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(cardsPage * CARDS_PER_PAGE, (cardsPage + 1) * CARDS_PER_PAGE - 1);
+
+  if (topic) query = query.eq('topic', topic);
+  if (type) query = query.eq('card_type', type);
+  if (status) query = query.eq('status', status);
+  if (search) query = query.ilike('title', `%${search}%`);
+
+  const res = await safeQuery(() => query);
+  const tbody = document.getElementById('cards-table');
+
+  if (!res.data || res.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><p>No cards found</p></td></tr>';
+    document.getElementById('cards-pagination').innerHTML = '';
+    return;
+  }
+
+  selectedCardIds.clear();
+  document.getElementById('select-all').checked = false;
+
+  tbody.innerHTML = res.data.map(c => `
+    <tr data-id="${c.id}" onclick="openCardModal('${c.id}')" style="cursor:pointer;">
+      <td onclick="event.stopPropagation()"><input type="checkbox" value="${c.id}" onchange="toggleCardSelect(this)"></td>
+      <td>${truncate(c.title, 45)}</td>
+      <td>${typeBadge(c.card_type)}</td>
+      <td><span style="color:${TOPIC_COLORS[c.topic]||'var(--text-sec)'}">${c.topic}</span></td>
+      <td>${statusBadge(c.status)}</td>
+      <td>${starsHtml(c.quality_score)}</td>
+      <td>${c.difficulty_level}</td>
+      <td style="color:var(--text-sec)">${fmtDate(c.created_at)}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="btn btn-green btn-sm" onclick="quickAction('${c.id}','published')" title="Publish">&#10004;</button>
+        <button class="btn btn-red btn-sm" onclick="quickAction('${c.id}','archived')" title="Archive">&#10006;</button>
+      </td>
+    </tr>`).join('');
+
+  // Pagination
+  const totalPages = Math.ceil((res.count || 0) / CARDS_PER_PAGE);
+  const pag = document.getElementById('cards-pagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+  let pagHtml = '';
+  if (cardsPage > 0) pagHtml += `<button onclick="cardsPage--;loadCards()">&#9664; Prev</button>`;
+  for (let i = 0; i < Math.min(totalPages, 10); i++) {
+    pagHtml += `<button class="${i===cardsPage?'active':''}" onclick="cardsPage=${i};loadCards()">${i+1}</button>`;
+  }
+  if (cardsPage < totalPages - 1) pagHtml += `<button onclick="cardsPage++;loadCards()">Next &#9654;</button>`;
+  pag.innerHTML = pagHtml;
+}
+
+function toggleSelectAll(el) {
+  const checked = el.checked;
+  document.querySelectorAll('#cards-table input[type="checkbox"]').forEach(cb => {
+    cb.checked = checked;
+    if (checked) selectedCardIds.add(cb.value);
+    else selectedCardIds.delete(cb.value);
+  });
+}
+
+function toggleCardSelect(el) {
+  if (el.checked) selectedCardIds.add(el.value);
+  else selectedCardIds.delete(el.value);
+}
+
+async function quickAction(id, status) {
+  const { error } = await sb.from('cards').update({ status }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast(`Card ${status}!`);
+  loadCards();
+}
+
+async function bulkAction(status) {
+  if (selectedCardIds.size === 0) { toast('No cards selected', 'info'); return; }
+  const ids = Array.from(selectedCardIds);
+  const { error } = await sb.from('cards').update({ status }).in('id', ids);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast(`${ids.length} cards ${status}!`);
+  selectedCardIds.clear();
+  loadCards();
+}
+
+async function openCardModal(id) {
+  const { data: card, error } = await sb.from('cards').select('*').eq('id', id).single();
+  if (error || !card) { toast('Could not load card', 'error'); return; }
+
+  document.getElementById('card-modal-title').textContent = 'Edit Card';
+  document.getElementById('card-modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;">
+      <div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="edit-title" value="${(card.title||'').replace(/"/g,'&quot;')}">
+        </div>
+        <div class="form-group">
+          <label>Subtitle</label>
+          <input type="text" id="edit-subtitle" value="${(card.subtitle||'').replace(/"/g,'&quot;')}">
+        </div>
+        <div class="form-group">
+          <label>Body</label>
+          <textarea id="edit-body" rows="8">${card.body||''}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label>Topic</label>
+            <select id="edit-topic">
+              ${['science','history','psychology','technology','arts','business','nature','space'].map(t =>
+                `<option value="${t}" ${t===card.topic?'selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="edit-type">
+              ${['quick_fact','insight','visual','story','deep_read','question','quote'].map(t =>
+                `<option value="${t}" ${t===card.card_type?'selected':''}>${t.replace(/_/g,' ')}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="edit-status">
+              ${['draft','review','approved','published','archived'].map(s =>
+                `<option value="${s}" ${s===card.status?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label>Difficulty (1-5)</label>
+            <input type="number" id="edit-difficulty" value="${card.difficulty_level}" min="1" max="5">
+          </div>
+          <div class="form-group">
+            <label>Quality Score (0-5)</label>
+            <input type="number" id="edit-quality" value="${card.quality_score||0}" min="0" max="5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Source</label>
+          <input type="text" id="edit-source" value="${(card.source_name||'').replace(/"/g,'&quot;')}">
+        </div>
+        <div class="form-group">
+          <label>Source URL</label>
+          <input type="text" id="edit-source-url" value="${(card.source_url||'').replace(/"/g,'&quot;')}">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-gold" onclick="saveCard('${card.id}')">Save Changes</button>
+          <button class="btn btn-green" onclick="quickAction('${card.id}','published');closeCardModal();">Approve &amp; Publish</button>
+          <button class="btn btn-red" onclick="quickAction('${card.id}','archived');closeCardModal();">Reject</button>
+          <button class="btn btn-ghost" onclick="deleteCard('${card.id}')">Delete</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.85rem;font-weight:600;color:var(--text-sec);margin-bottom:8px;">PREVIEW</div>
+        <div class="card-preview">
+          <div class="cp-type">${(card.card_type||'').replace(/_/g,' ')} &bull; ${card.topic}</div>
+          <div class="cp-title">${card.title||'Untitled'}</div>
+          <div class="cp-body">${truncate(card.body||'', 200)}</div>
+          <div class="cp-meta">
+            <span>&#9201; ${card.estimated_read_seconds||30}s</span>
+            <span>&#127919; Lvl ${card.difficulty_level}</span>
+            <span>${starsHtml(card.quality_score)}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('card-modal').classList.add('open');
+}
+
+function closeCardModal() { document.getElementById('card-modal').classList.remove('open'); }
+
+async function saveCard(id) {
+  const updates = {
+    title: document.getElementById('edit-title').value,
+    subtitle: document.getElementById('edit-subtitle').value,
+    body: document.getElementById('edit-body').value,
+    topic: document.getElementById('edit-topic').value,
+    card_type: document.getElementById('edit-type').value,
+    status: document.getElementById('edit-status').value,
+    difficulty_level: parseInt(document.getElementById('edit-difficulty').value) || 1,
+    quality_score: parseInt(document.getElementById('edit-quality').value) || 0,
+    source_name: document.getElementById('edit-source').value,
+    source_url: document.getElementById('edit-source-url').value
+  };
+  const { error } = await sb.from('cards').update(updates).eq('id', id);
+  if (error) { toast('Error saving: ' + error.message, 'error'); return; }
+  toast('Card saved!');
+  closeCardModal();
+  loadCards();
+}
+
+async function deleteCard(id) {
+  if (!confirm('Permanently delete this card?')) return;
+  const { error } = await sb.from('cards').delete().eq('id', id);
+  if (error) { toast('Error deleting: ' + error.message, 'error'); return; }
+  toast('Card deleted');
+  closeCardModal();
+  loadCards();
+}
+
+// ============================================================
+// PAGE: AI GENERATOR
+// ============================================================
+function switchGenTab(tab) {
+  document.querySelectorAll('#page-generator .tab').forEach((el, i) => {
+    const tabs = ['generate', 'prompts', 'history'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+  ['generate', 'prompts', 'history'].forEach(t => {
+    const el = document.getElementById('gen-tab-' + t);
+    if (el) el.style.display = (t === tab) ? 'block' : 'none';
+  });
+}
+
+function toggleCheck(el) {
+  const cb = el.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
+}
+
+async function loadPrompts() {
+  // Try to load from DB first; fall back to prompts.json
+  const res = await safeQuery(() => sb.from('content_prompts').select('*').eq('is_active', true));
+  const container = document.getElementById('prompt-editors');
+
+  if (res.data && res.data.length > 0) {
+    container.innerHTML = res.data.map(p => `
+      <div class="panel" style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="color:${TOPIC_COLORS[p.topic]||'var(--gold)'}">${p.topic}${p.card_type ? ' / '+p.card_type : ''}</strong>
+          <button class="btn btn-gold btn-sm" onclick="savePrompt('${p.id}', this)">Save</button>
+        </div>
+        <textarea id="prompt-${p.id}" rows="4" style="width:100%">${p.system_prompt}</textarea>
+      </div>`).join('');
+  } else {
+    // Load from file and show editors
+    try {
+      const resp = await fetch('prompts.json');
+      promptsConfig = await resp.json();
+    } catch (e) {
+      promptsConfig = { topic_prompts: {}, default_system_prompt: '' };
+    }
+    const topics = ['science','history','psychology','technology','arts','business','nature','space'];
+    container.innerHTML = topics.map(t => `
+      <div class="panel" style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong style="color:${TOPIC_COLORS[t]||'var(--gold)'}">${t}</strong>
+          <button class="btn btn-gold btn-sm" onclick="savePromptToDB('${t}', this)">Save to DB</button>
+        </div>
+        <textarea id="prompt-local-${t}" rows="4" style="width:100%">${(promptsConfig.topic_prompts && promptsConfig.topic_prompts[t]) || ''}</textarea>
+      </div>`).join('');
+  }
+}
+
+async function savePrompt(id, btn) {
+  const text = document.getElementById('prompt-' + id).value;
+  const { error } = await sb.from('content_prompts').update({ system_prompt: text }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Prompt saved!');
+}
+
+async function savePromptToDB(topic, btn) {
+  const text = document.getElementById('prompt-local-' + topic).value;
+  const { error } = await sb.from('content_prompts').insert({
+    topic, system_prompt: text, is_active: true
+  });
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast(`Prompt for ${topic} saved to database!`);
+}
+
+async function generateCards() {
+  const btn = document.getElementById('gen-btn');
+  const topic = document.getElementById('gen-topic').value;
+  const count = parseInt(document.getElementById('gen-count').value);
+  const diffMin = parseInt(document.getElementById('gen-diff-min').value);
+  const diffMax = parseInt(document.getElementById('gen-diff-max').value);
+  const instructions = document.getElementById('gen-instructions').value;
+  const types = [];
+  document.querySelectorAll('#gen-card-types input:checked').forEach(cb => types.push(cb.value));
+
+  if (types.length === 0) { toast('Select at least one card type', 'error'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="shimmer" style="display:inline-block;width:16px;height:16px;border-radius:50%;"></span> Generating...';
+
+  const resultsDiv = document.getElementById('gen-results');
+  resultsDiv.innerHTML = `
+    <div style="text-align:center;padding:40px;">
+      <div class="shimmer shimmer-block" style="width:100%;height:60px;margin-bottom:12px;"></div>
+      <div class="shimmer shimmer-block" style="width:100%;height:60px;margin-bottom:12px;"></div>
+      <div class="shimmer shimmer-block" style="width:100%;height:60px;"></div>
+      <p style="color:var(--text-sec);margin-top:16px;">Calling edge function...</p>
+    </div>`;
+
+  const startTime = Date.now();
+
+  try {
+    const { data, error } = await sb.functions.invoke('generate-cards', {
+      body: { topic, card_types: types, count, difficulty_min: diffMin, difficulty_max: diffMax, instructions }
+    });
+
+    const duration = Date.now() - startTime;
+
+    if (error) {
+      // Log the failure
+      await safeQuery(() => sb.from('generation_logs').insert({
+        topic, card_types: types, cards_requested: count,
+        cards_generated: 0, error_message: error.message, duration_ms: duration
+      }));
+      resultsDiv.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">&#9888;</div>
+          <p>Edge function error: ${error.message}</p>
+          <p style="font-size:.8rem;margin-top:8px;color:var(--text-sec);">Make sure the <code>generate-cards</code> edge function is deployed.</p>
+        </div>`;
+    } else if (data && data.cards && data.cards.length > 0) {
+      // Log success
+      await safeQuery(() => sb.from('generation_logs').insert({
+        topic, card_types: types, cards_requested: count,
+        cards_generated: data.cards.length, duration_ms: duration
+      }));
+      resultsDiv.innerHTML = data.cards.map((c, i) => `
+        <div class="panel" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div>
+              <div style="font-size:.75rem;color:var(--text-sec);margin-bottom:4px;">${typeBadge(c.card_type)} &bull; ${c.topic} &bull; Lvl ${c.difficulty_level}</div>
+              <div style="font-weight:600;margin-bottom:4px;">${c.title}</div>
+              <div style="font-size:.85rem;color:var(--text-sec);">${truncate(c.body, 150)}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <button class="btn btn-green btn-sm" onclick="approveGenerated(${i})">Approve</button>
+              <button class="btn btn-red btn-sm" onclick="rejectGenerated(${i})">Reject</button>
+            </div>
+          </div>
+        </div>`).join('');
+      window._generatedCards = data.cards;
+    } else {
+      // Log attempt
+      await safeQuery(() => sb.from('generation_logs').insert({
+        topic, card_types: types, cards_requested: count,
+        cards_generated: 0, error_message: 'No cards returned', duration_ms: duration
+      }));
+      resultsDiv.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">&#128230;</div>
+          <p>No cards were generated. The edge function returned empty results.</p>
+          <p style="font-size:.8rem;margin-top:8px;color:var(--text-sec);">Check the edge function logs in Supabase.</p>
+        </div>`;
+    }
+  } catch (e) {
+    const duration = Date.now() - startTime;
+    await safeQuery(() => sb.from('generation_logs').insert({
+      topic, card_types: types, cards_requested: count,
+      cards_generated: 0, error_message: e.message || 'Network error', duration_ms: duration
+    }));
+    resultsDiv.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">&#9888;</div>
+        <p>Could not reach edge function.</p>
+        <p style="font-size:.8rem;margin-top:8px;color:var(--text-sec);">${e.message || 'Network error'}</p>
+      </div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '&#129302; Generate Cards';
+}
+
+async function approveGenerated(index) {
+  if (!window._generatedCards || !window._generatedCards[index]) return;
+  const c = window._generatedCards[index];
+  c.status = 'published';
+  c.published_at = new Date().toISOString();
+  const { error } = await sb.from('cards').insert(c);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Card published!');
+  window._generatedCards.splice(index, 1);
+  // Re-render
+  const resultsDiv = document.getElementById('gen-results');
+  if (window._generatedCards.length === 0) {
+    resultsDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">&#10004;</div><p>All cards processed!</p></div>';
+  }
+}
+
+async function rejectGenerated(index) {
+  if (!window._generatedCards) return;
+  window._generatedCards.splice(index, 1);
+  toast('Card rejected');
+}
+
+async function loadGenHistory() {
+  const res = await safeQuery(() => sb.from('generation_logs').select('*').order('created_at', { ascending: false }).limit(20));
+  const tbody = document.getElementById('gen-history-table');
+  if (!res.data || res.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No generation history yet</p></td></tr>';
+    return;
+  }
+  tbody.innerHTML = res.data.map(g => `
+    <tr>
+      <td style="color:var(--text-sec)">${fmtDateTime(g.created_at)}</td>
+      <td><span style="color:${TOPIC_COLORS[g.topic]||'var(--text-sec)'}">${g.topic}</span></td>
+      <td style="font-size:.8rem;color:var(--text-sec)">${(g.card_types||[]).join(', ')}</td>
+      <td>${g.cards_requested}</td>
+      <td>${g.cards_generated}</td>
+      <td>${g.cards_published}</td>
+      <td style="color:var(--text-sec)">${g.duration_ms ? (g.duration_ms/1000).toFixed(1)+'s' : '--'}</td>
+      <td>${g.error_message
+        ? '<span class="badge badge-archived">Error</span>'
+        : '<span class="badge badge-published">Success</span>'}</td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// PAGE: EDITIONS
+// ============================================================
+async function loadEditions() {
+  const dateEl = document.getElementById('edition-date');
+  if (!dateEl.value) {
+    dateEl.value = new Date().toISOString().split('T')[0];
+  }
+  const date = dateEl.value;
+
+  const res = await safeQuery(() => sb.from('editions').select('*').eq('edition_date', date).order('created_at', { ascending: false }));
+  const editions = res.data || [];
+
+  document.getElementById('ed-total').textContent = editions.length;
+  const avgCards = editions.length > 0 ? (editions.reduce((s, e) => s + (e.total_cards || 0), 0) / editions.length).toFixed(1) : '0';
+  document.getElementById('ed-avg-cards').textContent = avgCards;
+
+  // Completion - check user_editions
+  let completionRate = '0%';
+  if (editions.length > 0) {
+    const editionIds = editions.map(e => e.id);
+    const ueRes = await safeQuery(() => sb.from('user_editions').select('*', { count: 'exact', head: true }).in('edition_id', editionIds).not('completed_at', 'is', null));
+    const completed = ueRes.count || 0;
+    completionRate = Math.round((completed / editions.length) * 100) + '%';
+  }
+  document.getElementById('ed-completion').textContent = completionRate;
+
+  const tbody = document.getElementById('editions-table');
+  if (editions.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>No editions for this date</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = editions.map(e => `
+    <tr>
+      <td style="font-family:monospace;font-size:.8rem;color:var(--text-sec);">${(e.user_id||'').substring(0,8)}...</td>
+      <td>${e.edition_date}</td>
+      <td>${e.total_cards}</td>
+      <td>${statusBadge(e.status)}</td>
+      <td style="color:var(--text-sec)">${fmtDateTime(e.assembled_at || e.created_at)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="expandEdition('${e.id}', this)">View Cards</button></td>
+    </tr>
+    <tr class="edition-detail" id="ed-detail-${e.id}" style="display:none;">
+      <td colspan="6" style="padding:0;background:rgba(0,0,0,.2);">
+        <div style="padding:16px;" id="ed-cards-${e.id}">Loading...</div>
+      </td>
+    </tr>`).join('');
+}
+
+async function expandEdition(editionId, btn) {
+  const detailRow = document.getElementById('ed-detail-' + editionId);
+  if (detailRow.style.display === 'table-row') {
+    detailRow.style.display = 'none';
+    btn.textContent = 'View Cards';
+    return;
+  }
+  detailRow.style.display = 'table-row';
+  btn.textContent = 'Hide';
+
+  const res = await safeQuery(() =>
+    sb.from('edition_cards').select('*, cards(title, card_type, topic)').eq('edition_id', editionId).order('position', { ascending: true })
+  );
+
+  const container = document.getElementById('ed-cards-' + editionId);
+  if (!res.data || res.data.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-sec);">No cards in this edition</p>';
+    return;
+  }
+
+  container.innerHTML = `<table style="width:100%;">
+    <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Topic</th><th>Pacing</th></tr></thead>
+    <tbody>${res.data.map(ec => `
+      <tr>
+        <td>${ec.position + 1}</td>
+        <td>${ec.cards ? ec.cards.title : '--'}</td>
+        <td>${typeBadge(ec.cards ? ec.cards.card_type : '')}</td>
+        <td>${ec.cards ? ec.cards.topic : '--'}</td>
+        <td><span class="badge badge-draft">${ec.pacing_role}</span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ============================================================
+// PAGE: USERS
+// ============================================================
+async function loadUsers() {
+  const search = (document.getElementById('user-search')?.value || '').trim();
+  const sortField = document.getElementById('user-sort')?.value || 'created_at';
+
+  // Join profiles with user_stats
+  let query = sb.from('profiles').select('*, user_stats(*)').order('created_at', { ascending: false }).limit(50);
+
+  if (search) {
+    query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+  }
+
+  const res = await safeQuery(() => query);
+  const tbody = document.getElementById('users-table');
+
+  if (!res.data || res.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No users found</p></td></tr>';
+    return;
+  }
+
+  let users = res.data.map(u => {
+    const stats = (u.user_stats && u.user_stats.length > 0) ? u.user_stats[0] : (u.user_stats || {});
+    return { ...u, _stats: stats };
+  });
+
+  // Sort
+  if (sortField !== 'created_at') {
+    users.sort((a, b) => (b._stats[sortField] || 0) - (a._stats[sortField] || 0));
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const s = u._stats;
+    return `<tr style="cursor:pointer" onclick="openUserModal('${u.id}')">
+      <td>${[u.first_name, u.last_name].filter(Boolean).join(' ') || 'Anonymous'}</td>
+      <td style="font-size:.8rem;color:var(--text-sec);">${(u.preferred_topics||[]).join(', ') || '--'}</td>
+      <td>${s.current_streak || 0} &#128293;</td>
+      <td>${(s.total_cards_read || 0).toLocaleString()}</td>
+      <td style="color:var(--gold)">${(s.xp_points || 0).toLocaleString()}</td>
+      <td>${s.level || 1}</td>
+      <td style="color:var(--text-sec)">${fmtDate(u.created_at)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openUserModal('${u.id}')">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function openUserModal(userId) {
+  const pRes = await safeQuery(() => sb.from('profiles').select('*').eq('id', userId).single());
+  const sRes = await safeQuery(() => sb.from('user_stats').select('*').eq('user_id', userId).single());
+  const savedRes = await safeQuery(() => sb.from('saved_cards').select('*, cards(title, card_type, topic)').eq('user_id', userId).limit(10));
+
+  const u = pRes.data || {};
+  const s = sRes.data || {};
+
+  document.getElementById('user-modal-title').textContent = [u.first_name, u.last_name].filter(Boolean).join(' ') || 'User Detail';
+  document.getElementById('user-modal-body').innerHTML = `
+    <div class="stats-row" style="margin-bottom:16px;">
+      <div class="stat-card"><div class="label">Streak</div><div class="value">${s.current_streak||0}</div><div class="sub">Best: ${s.longest_streak||0}</div></div>
+      <div class="stat-card"><div class="label">Cards Read</div><div class="value">${(s.total_cards_read||0).toLocaleString()}</div></div>
+      <div class="stat-card"><div class="label">XP</div><div class="value" style="color:var(--gold)">${(s.xp_points||0).toLocaleString()}</div></div>
+      <div class="stat-card"><div class="label">Level</div><div class="value">${s.level||1}</div></div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="panel-title">&#128100; Profile</div>
+        <p style="color:var(--text-sec);font-size:.9rem;margin-bottom:4px;">ID: <span style="font-family:monospace;font-size:.8rem;">${u.id||'--'}</span></p>
+        <p style="color:var(--text-sec);font-size:.9rem;margin-bottom:4px;">Tier: ${u.subscription_tier||'free'}</p>
+        <p style="color:var(--text-sec);font-size:.9rem;margin-bottom:4px;">Topics: ${(u.preferred_topics||[]).join(', ') || 'None'}</p>
+        <p style="color:var(--text-sec);font-size:.9rem;margin-bottom:4px;">Onboarded: ${u.onboarding_completed ? 'Yes' : 'No'}</p>
+        <p style="color:var(--text-sec);font-size:.9rem;">Joined: ${fmtDate(u.created_at)}</p>
+      </div>
+      <div>
+        <div class="panel-title">&#128278; Saved Cards (${savedRes.data?.length || 0})</div>
+        ${(savedRes.data && savedRes.data.length > 0) ?
+          savedRes.data.map(sc => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem;">
+            ${sc.cards ? sc.cards.title : 'Unknown card'} ${typeBadge(sc.cards?.card_type||'')}
+          </div>`).join('') :
+          '<p style="color:var(--text-sec);font-size:.9rem;">No saved cards</p>'}
+      </div>
+    </div>`;
+  document.getElementById('user-modal').classList.add('open');
+}
+
+function closeUserModal() { document.getElementById('user-modal').classList.remove('open'); }
+
+// ============================================================
+// PAGE: SETTINGS
+// ============================================================
+async function loadSettingsPage() {
+  try {
+    const resp = await fetch('prompts.json');
+    const config = await resp.json();
+    document.getElementById('set-default-prompt').value = config.default_system_prompt || '';
+  } catch (e) {
+    document.getElementById('set-default-prompt').value = '';
+  }
+}
+
+function saveSettings() {
+  // Settings are stored locally (no dedicated table for now)
+  const settings = {
+    cardsPerDay: document.getElementById('set-cards-per-day').value,
+    qualityThreshold: document.getElementById('set-quality-threshold').value,
+    priorityTopics: []
+  };
+  document.querySelectorAll('#set-priority-topics input:checked').forEach(cb => settings.priorityTopics.push(cb.value));
+  localStorage.setItem('glintup_admin_settings', JSON.stringify(settings));
+  toast('Settings saved locally');
+}
+
+function saveDefaultPrompt() {
+  const prompt = document.getElementById('set-default-prompt').value;
+  localStorage.setItem('glintup_default_prompt', prompt);
+  toast('Default prompt saved locally');
+}
+
+// ============================================================
+// MIGRATION MODAL
+// ============================================================
+function openMigrationModal() {
+  document.getElementById('migration-sql-code').textContent = MIGRATION_SQL;
+  document.getElementById('migration-modal').classList.add('open');
+}
+
+function closeMigrationModal() {
+  document.getElementById('migration-modal').classList.remove('open');
+}
+
+function copyMigrationSQL() {
+  navigator.clipboard.writeText(MIGRATION_SQL).then(() => toast('SQL copied to clipboard!'));
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date for editions
+  const edDate = document.getElementById('edition-date');
+  if (edDate) edDate.value = new Date().toISOString().split('T')[0];
+
+  // Load settings from local storage
+  const saved = localStorage.getItem('glintup_admin_settings');
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      if (s.cardsPerDay) document.getElementById('set-cards-per-day').value = s.cardsPerDay;
+      if (s.qualityThreshold) document.getElementById('set-quality-threshold').value = s.qualityThreshold;
+    } catch (e) {}
+  }
+
+  loadDashboard();
+});
+</script>
+</body>
+</html>

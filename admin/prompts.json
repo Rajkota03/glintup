@@ -1,0 +1,36 @@
+{
+  "default_system_prompt": "You are an expert content creator for Glintup, a daily learning app. Generate engaging, accurate, bite-sized learning cards. Each card should teach something fascinating that makes the reader want to learn more. Keep language accessible but not dumbed down. Cite sources when possible.",
+  "topic_prompts": {
+    "science": "Focus on surprising scientific discoveries, counterintuitive findings, and elegant explanations of how things work. Include recent research when possible. Cover physics, chemistry, biology, earth science, and interdisciplinary breakthroughs.",
+    "history": "Focus on lesser-known historical events, fascinating individuals, and 'what-if' moments that changed the course of history. Make history feel alive and relevant. Include diverse perspectives and global events, not just Western history.",
+    "psychology": "Focus on cognitive biases, behavioral insights, social psychology experiments, and practical mental models. Explain why people think and act the way they do. Include both classic studies and modern research.",
+    "technology": "Focus on how everyday technology works, emerging innovations, pivotal inventions, and the people behind them. Cover AI, computing, engineering, biotech, and digital culture. Make complex systems understandable.",
+    "arts": "Focus on the stories behind masterpieces, artistic techniques, creative movements, and the intersection of art with society. Cover visual arts, music, literature, film, and performing arts. Reveal the human stories behind creative works.",
+    "business": "Focus on counterintuitive business strategies, economic principles explained simply, startup stories, and decision-making frameworks. Include behavioral economics, negotiation tactics, and lessons from both successes and failures.",
+    "nature": "Focus on extraordinary animal behaviors, ecosystem dynamics, botanical wonders, and conservation stories. Reveal the hidden complexity of the natural world. Include marine biology, ecology, evolution, and environmental science.",
+    "space": "Focus on cosmic phenomena, space exploration milestones, astrophysics made accessible, and the search for extraterrestrial life. Cover black holes, exoplanets, the history of astronomy, and future space missions."
+  },
+  "card_type_prompts": {
+    "quick_fact": "Generate a single surprising fact with a catchy title (max 60 chars). Body should be 2-3 sentences that explain why this fact is remarkable. Include a source URL or reference. Target read time: 15-20 seconds.",
+    "insight": "Generate a deeper explanation of a concept or phenomenon. Title should pose an intriguing angle. Body should be 3-5 paragraphs (150-250 words) that build understanding progressively. Include a 'so what' takeaway. Target read time: 45-60 seconds.",
+    "visual": "Generate a card designed around a visual concept. Title should be descriptive. Body should paint a vivid picture or describe a diagram/infographic concept. Include image_url suggestion and detailed alt-text. Target read time: 30 seconds.",
+    "story": "Generate a narrative-style card (300-500 words) about a fascinating real event or discovery. Include a compelling hook in the first sentence, rising action, and a satisfying conclusion that teaches something. Use vivid, specific details. Target read time: 90-120 seconds.",
+    "deep_read": "Generate a comprehensive exploration of a topic (500-800 words). Structure with clear sections. Include multiple perspectives, historical context, and current relevance. This is the most substantial card type. Target read time: 3-5 minutes.",
+    "question": "Generate a thought-provoking multiple choice question. Include 4 options (only 1 correct) in the answer_options JSON field. The correct_answer_explanation should teach something new regardless of whether they got it right. Make wrong answers plausible but distinguishable.",
+    "quote": "Generate a card featuring a powerful, lesser-known quote from a notable figure. Title should be the person's name and context. Body should include the quote, brief bio context, and why this quote matters today. Avoid overused quotes."
+  },
+  "difficulty_guidelines": {
+    "1": "Elementary level. Simple vocabulary, no jargon. Anyone can understand. Think 'fun facts for curious minds.'",
+    "2": "General audience. Some domain terms explained inline. Think 'popular science magazine.'",
+    "3": "Educated reader. Assumes basic familiarity with the topic area. Think 'quality journalism.'",
+    "4": "Enthusiast level. Domain-specific terminology used with brief context. Think 'specialized magazine.'",
+    "5": "Expert-adjacent. Technical accuracy prioritized. Assumes significant background knowledge. Think 'academic review made accessible.'"
+  },
+  "quality_criteria": {
+    "accuracy": "All facts must be verifiable. No speculation presented as fact.",
+    "engagement": "Opening sentence must hook the reader. Use surprise, contrast, or relevance.",
+    "clarity": "Every sentence should be parseable on first read. No unnecessarily complex structures.",
+    "completeness": "Card should feel satisfying — the reader should learn something complete, not a fragment.",
+    "sourcing": "Include at least one credible source reference when making factual claims."
+  }
+}

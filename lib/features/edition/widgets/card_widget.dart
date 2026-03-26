@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/data/models/card_model.dart';
 import 'package:glintup/features/edition/widgets/card_types/quick_fact_card.dart';
@@ -11,30 +12,25 @@ import 'package:glintup/features/edition/widgets/card_types/deep_read_card.dart'
 
 /// Base card widget that delegates to the appropriate card-type renderer.
 ///
-/// Wraps every card in a rounded container with shadow and provides
-/// consistent chrome:
-///   - Topic label chip (top-left)
-///   - Estimated read time (top-right)
-///   - Save / bookmark button (top-right, passed in via callback)
-///   - Source attribution at bottom (when available)
+/// Minimal Luxury + Warm Editorial design:
+///   - White card with very subtle shadow
+///   - Card type background tints
+///   - Large faded position number in background
+///   - Subtle left border accent per card type
+///   - Pill badge for card type
 class CardWidget extends StatelessWidget {
   const CardWidget({
     super.key,
     required this.card,
+    this.cardIndex = 0,
     this.isSaved = false,
     this.onSaveToggle,
   });
 
   final CardModel card;
+  final int cardIndex;
   final bool isSaved;
   final VoidCallback? onSaveToggle;
-
-  /// Returns a human-readable read-time string.
-  String _readTime(int seconds) {
-    if (seconds < 60) return '${seconds}s read';
-    final minutes = (seconds / 60).ceil();
-    return '$minutes min read';
-  }
 
   /// Returns the colour associated with the card type.
   Color _cardTypeColor(CardType type) {
@@ -56,28 +52,59 @@ class CardWidget extends StatelessWidget {
     }
   }
 
+  /// Returns the background tint for each card type.
+  Color _cardTypeBg(CardType type) {
+    switch (type) {
+      case CardType.quickFact:
+        return AppColors.quickFactBg;
+      case CardType.insight:
+        return AppColors.insightBg;
+      case CardType.visual:
+        return AppColors.visualBg;
+      case CardType.story:
+        return AppColors.storyBg;
+      case CardType.deepRead:
+        return AppColors.deepReadBg;
+      case CardType.question:
+        return AppColors.questionBg;
+      case CardType.quote:
+        return AppColors.quoteBg;
+    }
+  }
+
+  /// Whether this card type uses a left border accent.
+  bool _usesLeftBorder(CardType type) {
+    return type != CardType.quote; // Quote card has centered layout, no border
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final cardHeight = screenHeight * 0.78;
     final typeColor = _cardTypeColor(card.cardType);
+    final bgColor = _cardTypeBg(card.cardType);
+    final positionStr =
+        (cardIndex + 1).toString().padLeft(2, '0');
 
     return Container(
       height: cardHeight,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: _usesLeftBorder(card.cardType)
+            ? Border(
+                left: BorderSide(
+                  color: typeColor.withOpacity(0.5),
+                  width: 3,
+                ),
+              )
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -85,87 +112,30 @@ class CardWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
+            // Background tint
+            Positioned.fill(
+              child: Container(color: bgColor),
+            ),
+
+            // Large faded position number
+            Positioned(
+              right: 16,
+              bottom: 24,
+              child: Text(
+                positionStr,
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 80,
+                  fontWeight: FontWeight.w700,
+                  color: typeColor.withOpacity(0.05),
+                  height: 1.0,
+                ),
+              ),
+            ),
+
             // Card content
             Positioned.fill(
               child: _buildCardContent(),
             ),
-
-            // Top overlay: topic chip + read time + bookmark
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: Row(
-                children: [
-                  // Topic chip
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      card.topic,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: typeColor,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-
-                  // Read time
-                  Text(
-                    _readTime(card.estimatedReadSeconds),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Bookmark / save button
-                  if (onSaveToggle != null)
-                    GestureDetector(
-                      onTap: onSaveToggle,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(
-                          isSaved
-                              ? Icons.bookmark_rounded
-                              : Icons.bookmark_border_rounded,
-                          key: ValueKey(isSaved),
-                          size: 22,
-                          color:
-                              isSaved ? AppColors.accent : AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Bottom source attribution
-            if (card.sourceName != null && card.sourceName!.isNotEmpty)
-              Positioned(
-                bottom: 16,
-                left: 16,
-                right: 16,
-                child: Text(
-                  card.sourceName!,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textMuted.withOpacity(0.7),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

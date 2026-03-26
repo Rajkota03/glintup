@@ -5,9 +5,9 @@ class AppConstants {
   static const String appTagline = 'Your daily dose. Then you\'re done.';
 
   // Supabase
-  static const String supabaseUrl = 'https://pbpmtqcffhqwzboviqfw.supabase.co';
+  static const String supabaseUrl = 'https://rghybidicpnlofzzufru.supabase.co';
   static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBicG10cWNmZmhxd3pib3ZpcWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyNzg0NDIsImV4cCI6MjA2MTg1NDQ0Mn0.SFMRxHpU_ei3MUhYOB2Bz4Gn3-JI0kVSsRRJN2xZ_hw';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnaHliaWRpY3BubG9menp1ZnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNzMxNDUsImV4cCI6MjA4OTk0OTE0NX0.NImgok7SGi4LWiSlIPECGtYPBMg_wiG-Lye3yikZYlg';
 
   // Edition config
   static const int freeEditionCardCount = 10;
