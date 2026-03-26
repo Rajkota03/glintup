@@ -11,6 +11,7 @@ import 'package:glintup/features/explore/screens/explore_screen.dart';
 import 'package:glintup/features/profile/screens/profile_screen.dart';
 import 'package:glintup/features/profile/screens/settings_screen.dart';
 import 'package:glintup/shared/widgets/app_shell.dart';
+import 'package:glintup/shared/widgets/splash_screen.dart';
 
 // Auth routes commented out — will be re-enabled when OTP is set up.
 // import 'package:glintup/features/auth/screens/login_screen.dart';
@@ -18,13 +19,12 @@ import 'package:glintup/shared/widgets/app_shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/home',
-    // Auth guard disabled for now — will be re-enabled after OTP setup.
-    // redirect: (context, state) { ... },
+    initialLocation: '/',
     routes: [
-      // Auth routes — will be re-enabled when OTP is set up.
-      // GoRoute(path: '/login', builder: ...),
-      // GoRoute(path: '/otp', builder: ...),
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const WelcomeScreen(),
