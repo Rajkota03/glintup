@@ -34,7 +34,7 @@ class _ShimmerCardState extends State<ShimmerCard>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _animation,
+      listenable: _animation,
       builder: (context, child) {
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

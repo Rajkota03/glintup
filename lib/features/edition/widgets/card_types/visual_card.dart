@@ -28,7 +28,7 @@ class VisualCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.visual.withOpacity(0.12),
+              color: AppColors.visual.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -132,7 +132,7 @@ class VisualCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.visual.withOpacity(0.08),
+        color: AppColors.visual.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Center(

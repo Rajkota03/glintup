@@ -198,7 +198,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 SliverToBoxAdapter(
                   child: topicsAsync.when(
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                     data: (topics) {
                       if (topics.isEmpty) return const SizedBox.shrink();
                       return _TrendingCardsList(topic: topics.first.slug);
@@ -346,7 +346,7 @@ class _TrendingCardsList extends ConsumerWidget {
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (cards) {
         final trending = cards.take(3).toList();
         if (trending.isEmpty) return const SizedBox.shrink();

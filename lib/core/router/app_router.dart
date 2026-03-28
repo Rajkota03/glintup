@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glintup/features/onboarding/screens/welcome_screen.dart';
@@ -10,12 +9,10 @@ import 'package:glintup/features/library/screens/library_screen.dart';
 import 'package:glintup/features/explore/screens/explore_screen.dart';
 import 'package:glintup/features/profile/screens/profile_screen.dart';
 import 'package:glintup/features/profile/screens/settings_screen.dart';
+import 'package:glintup/features/auth/screens/login_screen.dart';
+import 'package:glintup/features/auth/screens/otp_verification_screen.dart';
 import 'package:glintup/shared/widgets/app_shell.dart';
 import 'package:glintup/shared/widgets/splash_screen.dart';
-
-// Auth routes commented out — will be re-enabled when OTP is set up.
-// import 'package:glintup/features/auth/screens/login_screen.dart';
-// import 'package:glintup/features/auth/screens/otp_verification_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -24,6 +21,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final phoneNumber = state.extra as String? ?? '';
+          return OtpVerificationScreen(phoneNumber: phoneNumber);
+        },
       ),
       GoRoute(
         path: '/welcome',

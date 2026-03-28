@@ -54,7 +54,7 @@ class StatsRepository {
       body: {
         'user_id': userId,
         'card_id': cardId,
-        if (editionId != null) 'edition_id': editionId,
+        'edition_id': ?editionId,
         'interaction_type': interactionType,
         'time_spent_seconds': timeSpentSeconds,
       },

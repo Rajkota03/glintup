@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/core/constants/app_constants.dart';
 import 'package:glintup/core/network/supabase_client.dart';
+import 'package:glintup/data/repositories/auth_repository.dart';
 import 'package:glintup/features/profile/screens/profile_screen.dart';
 
 /// ──────────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             loading: () => const ListTile(
               title: Text('Loading...'),
             ),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
             data: (p) => Column(
               children: [
                 _SettingsTile(
@@ -203,6 +204,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 8),
 
+          // ── Sign Out ──────────────────────────────────────
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => _showSignOutDialog(context),
+                child: Text(
+                  'Sign Out',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
           // ── Danger Zone ──────────────────────────────────
           _SectionHeader(title: 'Danger Zone', isDestructive: true),
           const SizedBox(height: 8),
@@ -275,9 +297,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _showDeleteAccountDialog(BuildContext context) async {
+  Future<void> _showSignOutDialog(BuildContext dialogContext) async {
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: dialogContext,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out?'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      if (!mounted) return;
+      await AuthRepository().signOut();
+      if (mounted) context.go('/login');
+    }
+  }
+
+  Future<void> _showDeleteAccountDialog(BuildContext dialogContext) async {
+    final confirmed = await showDialog<bool>(
+      context: dialogContext,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Account?'),
         content: const Text(
@@ -300,15 +348,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
 
-    if (confirmed == true && mounted) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Account deletion will be available after auth is set up.'),
-          ),
-        );
-      }
+    if (confirmed == true) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Account deletion will be available after auth is set up.'),
+        ),
+      );
     }
   }
 }

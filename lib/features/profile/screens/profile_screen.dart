@@ -6,6 +6,7 @@ import 'package:glintup/core/constants/app_colors.dart';
 import 'package:glintup/core/network/supabase_client.dart';
 import 'package:glintup/core/demo/demo_data.dart';
 import 'package:glintup/data/models/user_stats_model.dart';
+import 'package:glintup/data/repositories/auth_repository.dart';
 
 final userStatsProvider = FutureProvider<UserStatsModel?>((ref) async {
   try {
@@ -74,7 +75,7 @@ class ProfileScreen extends ConsumerWidget {
               // Profile header
               profile.when(
                 loading: () => const SizedBox(height: 120),
-                error: (_, __) =>
+                error: (_, _) =>
                     _ProfileHeader(profile: DemoData.getSampleProfile()),
                 data: (p) => _ProfileHeader(profile: p),
               ),
@@ -83,7 +84,7 @@ class ProfileScreen extends ConsumerWidget {
               // Streak card
               stats.when(
                 loading: () => const SizedBox(height: 120),
-                error: (_, __) =>
+                error: (_, _) =>
                     _StreakCard(stats: DemoData.getSampleStats()),
                 data: (s) => _StreakCard(stats: s),
               ),
@@ -92,7 +93,7 @@ class ProfileScreen extends ConsumerWidget {
               // Stats section
               stats.when(
                 loading: () => const SizedBox(height: 200),
-                error: (_, __) =>
+                error: (_, _) =>
                     _StatsGrid(stats: DemoData.getSampleStats()),
                 data: (s) => _StatsGrid(stats: s),
               ),
@@ -110,7 +111,7 @@ class ProfileScreen extends ConsumerWidget {
               Center(
                 child: TextButton(
                   onPressed: () async {
-                    await SupabaseConfig.auth.signOut();
+                    await AuthRepository().signOut();
                     if (context.mounted) context.go('/login');
                   },
                   child: Text(

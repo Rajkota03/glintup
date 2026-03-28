@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:glintup/core/constants/app_colors.dart';
+import 'package:glintup/core/network/supabase_client.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,12 +32,40 @@ class _SplashScreenState extends State<SplashScreen>
     );
     _controller.forward();
 
-    // Navigate after 2 seconds
+    // Navigate after splash animation
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/home');
-      }
+      if (mounted) _navigate();
     });
+  }
+
+  Future<void> _navigate() async {
+    if (SupabaseConfig.isAuthenticated) {
+      // User is logged in — check if onboarding is complete
+      try {
+        final userId = SupabaseConfig.userId;
+        final data = await SupabaseConfig.client
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', userId!)
+            .maybeSingle();
+
+        if (!mounted) return;
+
+        final onboardingDone =
+            data != null && (data['onboarding_completed'] as bool? ?? false);
+
+        if (onboardingDone) {
+          context.go('/home');
+        } else {
+          context.go('/welcome');
+        }
+      } catch (_) {
+        if (mounted) context.go('/home');
+      }
+    } else {
+      // Not logged in — go to login
+      if (mounted) context.go('/login');
+    }
   }
 
   @override

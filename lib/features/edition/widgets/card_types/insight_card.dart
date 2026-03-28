@@ -28,7 +28,7 @@ class InsightCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.insight.withOpacity(0.12),
+              color: AppColors.insight.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -101,11 +101,11 @@ class InsightCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.insight.withOpacity(0.06),
+                color: AppColors.insight.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
                 border: Border(
                   left: BorderSide(
-                    color: AppColors.insight.withOpacity(0.4),
+                    color: AppColors.insight.withValues(alpha: 0.4),
                     width: 3,
                   ),
                 ),
@@ -116,7 +116,7 @@ class InsightCard extends StatelessWidget {
                   Icon(
                     Icons.lightbulb_rounded,
                     size: 18,
-                    color: AppColors.insight.withOpacity(0.7),
+                    color: AppColors.insight.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 10),
                   Expanded(

@@ -212,7 +212,7 @@ class _TopicCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isSelected
-              ? topic.color.withOpacity(0.12)
+              ? topic.color.withValues(alpha: 0.12)
               : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(

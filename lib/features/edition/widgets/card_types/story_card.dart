@@ -38,7 +38,7 @@ class StoryCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.story.withOpacity(0.12),
+                  color: AppColors.story.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -67,7 +67,7 @@ class StoryCard extends StatelessWidget {
               Icon(
                 Icons.schedule_rounded,
                 size: 13,
-                color: AppColors.textMuted.withOpacity(0.7),
+                color: AppColors.textMuted.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 4),
               Text(

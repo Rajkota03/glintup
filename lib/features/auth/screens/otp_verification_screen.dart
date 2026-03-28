@@ -157,7 +157,7 @@ class _OtpVerificationScreenState
       if (onboardingDone) {
         context.go('/home');
       } else {
-        context.go('/onboarding');
+        context.go('/welcome');
       }
     } catch (e) {
       if (!mounted) return;

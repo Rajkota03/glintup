@@ -53,7 +53,7 @@ class LibraryScreen extends ConsumerWidget {
                 loading: () => const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 ),
-                error: (_, __) => _EmptyLibrary(),
+                error: (_, _) => _EmptyLibrary(),
                 data: (cards) {
                   if (cards.isEmpty) {
                     return _EmptyLibrary();
@@ -61,7 +61,7 @@ class LibraryScreen extends ConsumerWidget {
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                     itemCount: cards.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final saved = cards[index];
                       return _SavedCardTile(saved: saved);

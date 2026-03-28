@@ -24,7 +24,7 @@ class WelcomeScreen extends ConsumerWidget {
                   width: 220,
                   height: 220,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(

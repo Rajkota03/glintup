@@ -95,14 +95,14 @@ class CardWidget extends StatelessWidget {
         border: _usesLeftBorder(card.cardType)
             ? Border(
                 left: BorderSide(
-                  color: typeColor.withOpacity(0.5),
+                  color: typeColor.withValues(alpha: 0.5),
                   width: 3,
                 ),
               )
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -126,7 +126,7 @@ class CardWidget extends StatelessWidget {
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 80,
                   fontWeight: FontWeight.w700,
-                  color: typeColor.withOpacity(0.05),
+                  color: typeColor.withValues(alpha: 0.05),
                   height: 1.0,
                 ),
               ),

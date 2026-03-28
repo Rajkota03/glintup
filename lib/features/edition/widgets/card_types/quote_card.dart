@@ -30,9 +30,9 @@ class QuoteCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withOpacity(0.04),
-            AppColors.primaryLight.withOpacity(0.06),
-            Colors.white.withOpacity(0.0),
+            AppColors.primary.withValues(alpha: 0.04),
+            AppColors.primaryLight.withValues(alpha: 0.06),
+            Colors.white.withValues(alpha: 0.0),
           ],
         ),
       ),
@@ -48,7 +48,7 @@ class QuoteCard extends StatelessWidget {
             style: GoogleFonts.playfairDisplay(
               fontSize: 72,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary.withOpacity(0.35),
+              color: AppColors.primary.withValues(alpha: 0.35),
               height: 0.8,
             ),
           ),
@@ -72,7 +72,7 @@ class QuoteCard extends StatelessWidget {
           Container(
             width: 40,
             height: 1,
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
 

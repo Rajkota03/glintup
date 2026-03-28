@@ -81,7 +81,7 @@ class _DeepReadCardState extends State<DeepReadCard> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.deepRead.withOpacity(0.12),
+                    color: AppColors.deepRead.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -175,7 +175,7 @@ class _DeepReadCardState extends State<DeepReadCard> {
                     horizontalRuleDecoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -185,7 +185,7 @@ class _DeepReadCardState extends State<DeepReadCard> {
                     blockquoteDecoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: AppColors.primary.withOpacity(0.5),
+                          color: AppColors.primary.withValues(alpha: 0.5),
                           width: 3,
                         ),
                       ),
@@ -225,11 +225,11 @@ class _DeepReadCardState extends State<DeepReadCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.deepRead.withOpacity(0.06),
+                      color: AppColors.deepRead.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(12),
                       border: Border(
                         left: BorderSide(
-                          color: AppColors.deepRead.withOpacity(0.5),
+                          color: AppColors.deepRead.withValues(alpha: 0.5),
                           width: 3,
                         ),
                       ),
@@ -240,7 +240,7 @@ class _DeepReadCardState extends State<DeepReadCard> {
                         Icon(
                           Icons.lightbulb_rounded,
                           size: 18,
-                          color: AppColors.deepRead.withOpacity(0.7),
+                          color: AppColors.deepRead.withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -291,7 +291,7 @@ class _DeepReadCardState extends State<DeepReadCard> {
         Expanded(
           child: Container(
             height: 1,
-            color: AppColors.primary.withOpacity(0.15),
+            color: AppColors.primary.withValues(alpha: 0.15),
           ),
         ),
         Padding(
@@ -300,14 +300,14 @@ class _DeepReadCardState extends State<DeepReadCard> {
             '\u25C6', // diamond
             style: TextStyle(
               fontSize: 8,
-              color: AppColors.primary.withOpacity(0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
             ),
           ),
         ),
         Expanded(
           child: Container(
             height: 1,
-            color: AppColors.primary.withOpacity(0.15),
+            color: AppColors.primary.withValues(alpha: 0.15),
           ),
         ),
       ],

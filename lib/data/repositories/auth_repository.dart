@@ -30,6 +30,13 @@ class AuthRepository {
         'otp': otp,
       },
     );
+
+    // Set the session from the edge function response
+    if (response['success'] == true && response['session'] != null) {
+      final session = response['session'] as Map<String, dynamic>;
+      await SupabaseConfig.auth.setSession(session['access_token'] as String);
+    }
+
     return response;
   }
 

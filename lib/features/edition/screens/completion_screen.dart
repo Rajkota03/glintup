@@ -81,7 +81,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -139,7 +139,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 12,
                           offset: const Offset(0, 2),
                         ),
@@ -156,7 +156,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
                           ),
                           Container(
                             width: 1,
-                            color: AppColors.primary.withOpacity(0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                           ),
                           Expanded(
                             child: _StatItem(
@@ -166,7 +166,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
                           ),
                           Container(
                             width: 1,
-                            color: AppColors.primary.withOpacity(0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                           ),
                           Expanded(
                             child: _StatItem(
@@ -234,7 +234,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
                                   color: i < 7
                                       ? Colors.white
                                       : Colors.white
-                                          .withOpacity(0.3),
+                                          .withValues(alpha: 0.3),
                                 ),
                               ),
                             );
@@ -302,7 +302,7 @@ class _CompletionScreenState extends ConsumerState<CompletionScreen> {
         child: Icon(
           Icons.auto_awesome,
           size: sparkleSize,
-          color: AppColors.primary.withOpacity(0.15 + rng.nextDouble() * 0.1),
+          color: AppColors.primary.withValues(alpha: 0.15 + rng.nextDouble() * 0.1),
         )
             .animate()
             .fadeIn(delay: delay.ms, duration: 600.ms)

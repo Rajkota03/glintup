@@ -28,7 +28,7 @@ class QuickFactCard extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.quickFact.withOpacity(0.12),
+              color: AppColors.quickFact.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(

@@ -82,7 +82,7 @@ class _QuestionCardState extends State<QuestionCard>
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.question.withOpacity(0.12),
+              color: AppColors.question.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -151,7 +151,7 @@ class _QuestionCardState extends State<QuestionCard>
                           color: (_selectedIndex == _correctIndex
                                   ? AppColors.success
                                   : AppColors.question)
-                              .withOpacity(0.06),
+                              .withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(12),
                           border: Border(
                             left: BorderSide(
@@ -238,16 +238,16 @@ class _AnswerOption extends StatelessWidget {
 
   Color get _backgroundColor {
     if (!answered) return Colors.white;
-    if (isCorrect) return AppColors.success.withOpacity(0.06);
-    if (isSelected) return AppColors.error.withOpacity(0.06);
+    if (isCorrect) return AppColors.success.withValues(alpha: 0.06);
+    if (isSelected) return AppColors.error.withValues(alpha: 0.06);
     return Colors.white;
   }
 
   Color get _borderColor {
     if (!answered) return AppColors.border;
-    if (isCorrect) return AppColors.success.withOpacity(0.5);
-    if (isSelected) return AppColors.error.withOpacity(0.5);
-    return AppColors.border.withOpacity(0.5);
+    if (isCorrect) return AppColors.success.withValues(alpha: 0.5);
+    if (isSelected) return AppColors.error.withValues(alpha: 0.5);
+    return AppColors.border.withValues(alpha: 0.5);
   }
 
   Color get _circleColor {
@@ -279,7 +279,7 @@ class _AnswerOption extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: _circleColor.withOpacity(0.12),
+                color: _circleColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Center(

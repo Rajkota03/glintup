@@ -95,7 +95,7 @@ class _EditionScreenState extends ConsumerState<EditionScreen>
                     totalCards: editionState.totalCards,
                     height: 3.0,
                     color: AppColors.primary,
-                    backgroundColor: AppColors.primaryLight.withOpacity(0.3),
+                    backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
                   ),
                 ),
 
@@ -139,10 +139,10 @@ class _EditionScreenState extends ConsumerState<EditionScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.primary.withOpacity(0.2),
+                              color: AppColors.primary.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -398,7 +398,7 @@ class _EmptyEdition extends StatelessWidget {
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
