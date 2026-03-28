@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:glintup/core/constants/app_colors.dart';
+import 'package:glintup/core/network/supabase_client.dart';
 import 'package:glintup/data/repositories/auth_repository.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -12,32 +13,64 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _phoneController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _LoginScreenState extends ConsumerState<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _authRepository = AuthRepository();
-
   bool _isLoading = false;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
+    _fadeController.forward();
+  }
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
-  String get _fullPhoneNumber => '+91${_phoneController.text.trim()}';
-
-  Future<void> _sendOtp() async {
-    if (!_formKey.currentState!.validate()) return;
-
+  Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
 
     try {
-      await _authRepository.sendOtp(_fullPhoneNumber);
+      await _authRepository.signInWithGoogle();
 
       if (!mounted) return;
 
-      context.push('/otp', extra: _fullPhoneNumber);
+      // Check if onboarding is complete
+      final userId = SupabaseConfig.userId;
+      if (userId != null) {
+        final data = await SupabaseConfig.client
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', userId)
+            .maybeSingle();
+
+        if (!mounted) return;
+
+        final onboardingDone =
+            data != null && (data['onboarding_completed'] as bool? ?? false);
+
+        if (onboardingDone) {
+          context.go('/home');
+        } else {
+          context.go('/welcome');
+        }
+      } else {
+        context.go('/welcome');
+      }
     } catch (e) {
       if (!mounted) return;
 
@@ -63,115 +96,131 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Spacer(flex: 2),
+                const Spacer(flex: 3),
 
-                // Logo / App Name
-                const Icon(
-                  Icons.auto_awesome,
-                  size: 56,
-                  color: AppColors.primary,
+                // App icon
+                Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 44,
+                    color: AppColors.primary,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 24),
+
+                // App name
                 Text(
                   'Glintup',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-
-                const SizedBox(height: 48),
-
-                // Welcome heading
-                Text(
-                  'Welcome back',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 40,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter your phone number to continue',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-
-                const SizedBox(height: 32),
-
-                // Phone number input
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: '9876543210',
-                    prefixIcon: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '+91',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 1,
-                            height: 24,
-                            color: AppColors.textMuted,
-                          ),
-                        ],
-                      ),
-                    ),
+                  'Your daily dose of learning',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: AppColors.textTertiary,
+                    letterSpacing: 0.3,
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    if (value.trim().length != 10) {
-                      return 'Phone number must be 10 digits';
-                    }
-                    return null;
-                  },
                 ),
 
-                const SizedBox(height: 24),
+                const Spacer(flex: 2),
 
-                // Send OTP button
+                // Google Sign-In button
                 SizedBox(
+                  width: double.infinity,
                   height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _sendOtp,
+                  child: OutlinedButton(
+                    onPressed: _isLoading ? null : _signInWithGoogle,
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Colors.white,
+                              color: Colors.grey.shade600,
                             ),
                           )
-                        : const Text('Send OTP'),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Google "G" logo
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Image.network(
+                                  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                                  width: 24,
+                                  height: 24,
+                                  errorBuilder: (_, e, st) => Icon(
+                                    Icons.g_mobiledata,
+                                    size: 28,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Continue with Google',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
 
-                const Spacer(flex: 3),
+                const SizedBox(height: 32),
+
+                // Terms text
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'By continuing, you agree to our Terms of Service and Privacy Policy',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+
+                const Spacer(flex: 1),
               ],
             ),
           ),

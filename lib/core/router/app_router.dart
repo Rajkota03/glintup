@@ -10,7 +10,6 @@ import 'package:glintup/features/explore/screens/explore_screen.dart';
 import 'package:glintup/features/profile/screens/profile_screen.dart';
 import 'package:glintup/features/profile/screens/settings_screen.dart';
 import 'package:glintup/features/auth/screens/login_screen.dart';
-import 'package:glintup/features/auth/screens/otp_verification_screen.dart';
 import 'package:glintup/shared/widgets/app_shell.dart';
 import 'package:glintup/shared/widgets/splash_screen.dart';
 
@@ -25,13 +24,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/otp',
-        builder: (context, state) {
-          final phoneNumber = state.extra as String? ?? '';
-          return OtpVerificationScreen(phoneNumber: phoneNumber);
-        },
       ),
       GoRoute(
         path: '/welcome',
